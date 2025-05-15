@@ -1,257 +1,175 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { 
   View, 
   Text, 
-  FlatList, 
   TouchableOpacity, 
   StyleSheet, 
-  ActivityIndicator,
-  Alert,
+  ScrollView,
 } from 'react-native';
 import { colores, estilosGlobales } from '../estilos/estilosGlobales';
 import Cabecera from '../componentes/Cabecera';
-import { AntDesign, Feather } from '@expo/vector-icons';
-import { obtenerEvaluaciones, eliminarEvaluacion, inicializarRubrica } from '../basedatos/rubricaServicio';
 
 /**
- * Pantalla principal que muestra la lista de evaluaciones
+ * Pantalla principal que muestra la pantalla de inicio con opciones de navegación
  * @param {Object} props Propiedades del componente
  * @param {Object} props.navigation Objeto de navegación
  * @returns {React.Component} Componente de pantalla de inicio
  */
 const PantallaInicio = ({ navigation }) => {
-  const [evaluaciones, setEvaluaciones] = useState([]);
-  const [cargando, setCargando] = useState(true);
-
-  const cargarEvaluaciones = async () => {
-    setCargando(true);
-    try {
-      // Aseguramos que la rúbrica esté inicializada
-      await inicializarRubrica();
-      
-      // Obtenemos las evaluaciones
-      const datos = await obtenerEvaluaciones();
-      setEvaluaciones(datos);
-    } catch (error) {
-      console.error('Error al cargar evaluaciones:', error);
-      Alert.alert('Error', 'No se pudieron cargar las evaluaciones');
-    } finally {
-      setCargando(false);
-    }
+  const navegarANuevaEvaluacion = () => {
+    navigation.navigate('NuevaEvaluacion');
   };
 
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-      cargarEvaluaciones();
-    });
-
-    return unsubscribe;
-  }, [navigation]);
-
-  const handleEliminarEvaluacion = (id) => {
-    Alert.alert(
-      'Confirmar eliminación',
-      '¿Está seguro que desea eliminar esta evaluación? Esta acción no se puede deshacer.',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Eliminar',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await eliminarEvaluacion(id);
-              cargarEvaluaciones();
-              Alert.alert('Éxito', 'La evaluación ha sido eliminada correctamente');
-            } catch (error) {
-              console.error('Error al eliminar:', error);
-              Alert.alert('Error', 'No se pudo eliminar la evaluación');
-            }
-          },
-        },
-      ]
-    );
+  const navegarABuscarEvaluaciones = () => {
+    navigation.navigate('BuscarEvaluaciones');
   };
-
-  const renderItem = ({ item }) => {
-    const fecha = new Date(item.fecha).toLocaleDateString();
-    
-    return (
-      <TouchableOpacity
-        style={styles.tarjetaEvaluacion}
-        onPress={() => navigation.navigate('DetalleEvaluacion', { evaluacionId: item.id })}
-      >
-        <View style={styles.contenidoTarjeta}>
-          <View style={styles.infoEvaluacion}>
-            <Text style={styles.tituloEvaluacion}>{item.titulo}</Text>
-            <Text style={styles.fechaEvaluacion}>{fecha}</Text>
-            <Text style={styles.estudianteEvaluacion}>
-              {`${item.estudiante.nombre} ${item.estudiante.apellido}`}
-            </Text>
-          </View>
-          
-          <View style={styles.accionesTarjeta}>
-            <TouchableOpacity
-              style={styles.botonAccion}
-              onPress={() => handleEliminarEvaluacion(item.id)}
-            >
-              <Feather name="trash-2" size={22} color={colores.error} />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </TouchableOpacity>
-    );
-  };
-
-  const ListaVacia = () => (
-    <View style={styles.contenedorVacio}>
-      <Feather name="clipboard" size={64} color={colores.texto + '80'} />
-      <Text style={styles.textoVacio}>No hay evaluaciones registradas</Text>
-      <Text style={styles.subtextoVacio}>
-        Presione el botón '+' para crear una nueva evaluación
-      </Text>
-    </View>
-  );
 
   return (
     <View style={estilosGlobales.contenedor}>
-      <Cabecera titulo="Registro de Notas" />
-      
-      {cargando ? (
-        <View style={estilosGlobales.contenedorCentrado}>
-          <ActivityIndicator size="large" color={colores.primario} />
-          <Text style={styles.textoCargando}>Cargando evaluaciones...</Text>
-        </View>
-      ) : (
-        <>
-          <FlatList
-            data={evaluaciones}
-            keyExtractor={(item) => item.id}
-            renderItem={renderItem}
-            contentContainerStyle={styles.listaContenido}
-            ListEmptyComponent={ListaVacia}
-          />
-          
-          <TouchableOpacity
-            style={styles.botonFlotante}
-            onPress={() => navigation.navigate('NuevaEvaluacion')}
-          >
-            <AntDesign name="plus" size={24} color={colores.textoClaro} />
+      <Cabecera 
+        titulo="Registro de Notas" 
+        accionDerecha={
+          <TouchableOpacity onPress={() => navigation.navigate('Ayuda')}>
+            <Text style={styles.botonAyuda}>?</Text>
           </TouchableOpacity>
-          
+        }
+      />
+      <ScrollView contentContainerStyle={styles.contenido}>
+        <View style={styles.bienvenida}>
+          <Text style={styles.tituloBienvenida}>Bienvenido al Sistema de Registro de Notas</Text>
+          <Text style={styles.subtituloBienvenida}>
+            Esta aplicación te permite evaluar presentaciones utilizando una rúbrica predefinida
+          </Text>
+        </View>
+
+        <View style={styles.opcionesContainer}>
           <TouchableOpacity
-            style={styles.botonEstadisticas}
+            style={[styles.opcion, { backgroundColor: colores.primario }]}
+            onPress={navegarANuevaEvaluacion}
+          >
+            <Text style={styles.opcionTitulo}>Nueva Evaluación</Text>
+            <Text style={styles.opcionDescripcion}>Registra una nueva evaluación para un estudiante</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.opcion, { backgroundColor: colores.secundario }]}
+            onPress={navegarABuscarEvaluaciones}
+          >
+            <Text style={styles.opcionTitulo}>Buscar Evaluaciones</Text>
+            <Text style={styles.opcionDescripcion}>Consulta evaluaciones realizadas anteriormente</Text>
+          </TouchableOpacity>
+{/** 
+          <TouchableOpacity
+            style={[styles.opcion, { backgroundColor: colores.info }]}
             onPress={() => navigation.navigate('Estadisticas')}
           >
-            <Feather name="bar-chart-2" size={22} color={colores.textoClaro} />
+            <Text style={styles.opcionTitulo}>Estadísticas</Text>
+            <Text style={styles.opcionDescripcion}>Ver resumen estadístico de las evaluaciones</Text>
           </TouchableOpacity>
-        </>
-      )}
+          */}
+        </View>
+
+        <View style={styles.seccionAyuda}>
+          <Text style={styles.tituloAyuda}>Información de la Rúbrica</Text>
+          <Text style={styles.textoAyuda}>
+            La rúbrica utilizada para las evaluaciones consta de 3 criterios principales:
+          </Text>
+          <View style={styles.listaCriterios}>
+            <Text style={styles.itemCriterio}>• ACTITUD (2 indicadores)</Text>
+            <Text style={styles.itemCriterio}>• DEL CONTENIDO DE LA PRESENTACIÓN (4 indicadores)</Text>
+            <Text style={styles.itemCriterio}>• EXPOSICIÓN (4 indicadores)</Text>
+          </View>
+          <Text style={styles.textoAyuda}>
+            Cada indicador se evalúa en una escala de Deficiente a Excelente, con valores numéricos específicos.
+          </Text>
+        </View>
+      </ScrollView>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  listaContenido: {
+  contenido: {
     padding: 16,
-    paddingBottom: 80,
-    flexGrow: 1,
+    paddingBottom: 30,
   },
-  tarjetaEvaluacion: {
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    marginBottom: 16,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-  },
-  contenidoTarjeta: {
-    padding: 16,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  infoEvaluacion: {
-    flex: 1,
-  },
-  tituloEvaluacion: {
+  botonAyuda: {
     fontSize: 18,
     fontWeight: 'bold',
+    color: colores.textoClaro,
+    backgroundColor: colores.primario + '80',
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    textAlign: 'center',
+    lineHeight: 30,
+  },
+  bienvenida: {
+    marginBottom: 24,
+  },
+  tituloBienvenida: {
+    fontSize: 24,
+    fontWeight: 'bold',
     color: colores.texto,
-    marginBottom: 4,
+    marginBottom: 8,
+    textAlign: 'center',
   },
-  fechaEvaluacion: {
-    fontSize: 14,
-    color: '#757575',
-    marginBottom: 4,
-  },
-  estudianteEvaluacion: {
+  subtituloBienvenida: {
     fontSize: 16,
-    color: colores.texto,
+    color: colores.textoSecundario,
+    textAlign: 'center',
+    lineHeight: 22,
   },
-  accionesTarjeta: {
-    justifyContent: 'center',
+  opcionesContainer: {
+    marginBottom: 24,
+  },
+  opcion: {
+    borderRadius: 10,
+    padding: 16,
+    marginBottom: 16,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  opcionTitulo: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 6,
+  },
+  opcionDescripcion: {
+    fontSize: 14,
+    color: '#fff',
+    opacity: 0.9,
+  },
+  seccionAyuda: {
+    backgroundColor: '#f8f9fa',
+    borderRadius: 10,
+    padding: 16,
+    marginBottom: 20,
+  },
+  tituloAyuda: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: colores.texto,
+    marginBottom: 8,
+  },
+  textoAyuda: {
+    fontSize: 14,
+    color: colores.textoSecundario,
+    marginBottom: 8,
+    lineHeight: 20,
+  },
+  listaCriterios: {
+    marginVertical: 8,
     paddingLeft: 8,
   },
-  botonAccion: {
-    padding: 8,
-  },
-  botonFlotante: {
-    position: 'absolute',
-    right: 16,
-    bottom: 16,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: colores.primario,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-  },
-  botonEstadisticas: {
-    position: 'absolute',
-    right: 16,
-    bottom: 88,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: colores.secundario,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-  },
-  contenedorVacio: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 32,
-    paddingVertical: 64,
-  },
-  textoVacio: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colores.texto,
-    marginTop: 16,
-    textAlign: 'center',
-  },
-  subtextoVacio: {
+  itemCriterio: {
     fontSize: 14,
-    color: '#757575',
-    marginTop: 8,
-    textAlign: 'center',
-  },
-  textoCargando: {
-    marginTop: 16,
-    fontSize: 16,
     color: colores.texto,
+    marginBottom: 6,
   },
 });
 

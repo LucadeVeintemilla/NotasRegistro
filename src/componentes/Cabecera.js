@@ -17,7 +17,7 @@ const Cabecera = ({ titulo, onAtras }) => {
       <View style={styles.contenido}>
         {onAtras && (
           <TouchableOpacity style={styles.botonAtras} onPress={onAtras}>
-            <AntDesign name="arrowleft" size={24} color={colores.textoClaro} />
+            <AntDesign name="arrowleft" size={28} color={colores.textoClaro} />
           </TouchableOpacity>
         )}
         <Text style={styles.titulo} numberOfLines={1}>
@@ -32,7 +32,7 @@ const Cabecera = ({ titulo, onAtras }) => {
 const styles = StyleSheet.create({
   contenedor: {
     backgroundColor: colores.primario,
-    paddingTop: 0,
+    paddingTop: 50, 
     elevation: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -54,10 +54,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   botonAtras: {
-    padding: 8,
+    padding: 10,
+    marginLeft: 4,
+    marginRight: 4,
   },
   espacioDerecho: {
-    width: 40, // Para balancear la cabecera cuando hay botón atrás
+    width: 40,
   },
 });
 

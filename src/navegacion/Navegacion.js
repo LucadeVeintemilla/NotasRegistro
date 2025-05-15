@@ -7,6 +7,7 @@ import PantallaInicio from '../pantallas/PantallaInicio';
 import PantallaNuevaEvaluacion from '../pantallas/PantallaNuevaEvaluacion';
 import PantallaDetalleEvaluacion from '../pantallas/PantallaDetalleEvaluacion';
 import PantallaEstadisticas from '../pantallas/PantallaEstadisticas';
+import PantallaBuscarEvaluaciones from '../pantallas/PantallaBuscarEvaluaciones';
 
 const Stack = createNativeStackNavigator();
 
@@ -28,6 +29,7 @@ const Navegacion = () => {
         <Stack.Screen name="NuevaEvaluacion" component={PantallaNuevaEvaluacion} />
         <Stack.Screen name="DetalleEvaluacion" component={PantallaDetalleEvaluacion} />
         <Stack.Screen name="Estadisticas" component={PantallaEstadisticas} />
+        <Stack.Screen name="BuscarEvaluaciones" component={PantallaBuscarEvaluaciones} />
       </Stack.Navigator>
     </NavigationContainer>
   );

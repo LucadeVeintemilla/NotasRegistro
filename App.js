@@ -10,7 +10,6 @@ import { inicializarRubrica } from './src/basedatos/rubricaServicio';
  */
 export default function App() {
   useEffect(() => {
-    // Inicializar la rúbrica al iniciar la aplicación
     inicializarRubrica();
   }, []);
 
