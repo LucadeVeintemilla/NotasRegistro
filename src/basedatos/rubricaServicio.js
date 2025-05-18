@@ -177,7 +177,6 @@ export const guardarEvaluacion = async (evaluacion) => {
     const evaluacionesJSON = await AsyncStorage.getItem(CLAVE_EVALUACIONES);
     const evaluaciones = JSON.parse(evaluacionesJSON || '[]');
     
-    // Generar un ID único para la evaluación
     const evaluacionId = Date.now().toString();
     const nuevaEvaluacion = {
       id: evaluacionId,

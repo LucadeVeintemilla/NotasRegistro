@@ -119,7 +119,7 @@ const PantallaNuevaEvaluacion = ({ navigation }) => {
 
       const nuevaEvaluacion = {
         titulo,
-        fecha: new Date().toISOString().split('T')[0], // Formato YYYY-MM-DD
+        fecha: new Date().toISOString().split('T')[0],
         estudiante: datosEstudiante,
         notas,
       };

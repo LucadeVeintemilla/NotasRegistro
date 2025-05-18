@@ -58,15 +58,9 @@ const PantallaInicio = ({ navigation }) => {
             <Text style={styles.opcionTitulo}>Buscar Evaluaciones</Text>
             <Text style={styles.opcionDescripcion}>Consulta evaluaciones realizadas anteriormente</Text>
           </TouchableOpacity>
-{/** 
-          <TouchableOpacity
-            style={[styles.opcion, { backgroundColor: colores.info }]}
-            onPress={() => navigation.navigate('Estadisticas')}
-          >
-            <Text style={styles.opcionTitulo}>Estadísticas</Text>
-            <Text style={styles.opcionDescripcion}>Ver resumen estadístico de las evaluaciones</Text>
-          </TouchableOpacity>
-          */}
+
+         
+          
         </View>
 
         <View style={styles.seccionAyuda}>

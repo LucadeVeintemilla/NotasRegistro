@@ -48,7 +48,6 @@ const PantallaBuscarEvaluaciones = ({ navigation }) => {
     return unsubscribe;
   }, [navigation]);
 
-  // Filtrar evaluaciones según el texto ingresado
   const filtrarEvaluaciones = (texto) => {
     setTextoBusqueda(texto);
     

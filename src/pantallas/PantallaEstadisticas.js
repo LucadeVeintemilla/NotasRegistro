@@ -1,16 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
   ActivityIndicator,
   Alert,
-  Dimensions,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View
 } from 'react-native';
-import { colores, estilosGlobales } from '../estilos/estilosGlobales';
-import Cabecera from '../componentes/Cabecera';
 import { obtenerEvaluaciones, obtenerRubricaCompleta } from '../basedatos/rubricaServicio';
+import Cabecera from '../componentes/Cabecera';
+import { colores, estilosGlobales } from '../estilos/estilosGlobales';
 
 /**
  * Pantalla que muestra estadísticas de las evaluaciones
@@ -38,14 +37,12 @@ const PantallaEstadisticas = ({ navigation }) => {
   useEffect(() => {
     const cargarDatos = async () => {
       try {
-        // Obtener evaluaciones y rúbrica
         const datosEvaluaciones = await obtenerEvaluaciones();
         const datosRubrica = await obtenerRubricaCompleta();
         
         setEvaluaciones(datosEvaluaciones);
         setRubrica(datosRubrica);
         
-        // Calcular estadísticas
         if (datosEvaluaciones.length > 0) {
           calcularEstadisticas(datosEvaluaciones, datosRubrica);
         }
@@ -61,7 +58,6 @@ const PantallaEstadisticas = ({ navigation }) => {
   }, []);
 
   const calcularEstadisticas = (evaluaciones, rubrica) => {
-    // Crear un mapa para facilitar la búsqueda de indicadores
     const mapaIndicadores = {};
     let puntajeMaximoPosible = 0;
     
@@ -77,7 +73,6 @@ const PantallaEstadisticas = ({ navigation }) => {
       });
     });
     
-    // Inicializar contadores de estadísticas
     const porCriterio = {};
     const conteoOpciones = {
       Deficiente: 0,
@@ -88,7 +83,6 @@ const PantallaEstadisticas = ({ navigation }) => {
     };
     let sumaPuntajes = 0;
     
-    // Contadores por criterio
     rubrica.forEach(criterio => {
       porCriterio[criterio.criterio] = {
         totalPuntos: 0,
@@ -104,11 +98,9 @@ const PantallaEstadisticas = ({ navigation }) => {
       });
     });
     
-    // Procesar cada evaluación
     evaluaciones.forEach(evaluacion => {
       let puntajeEvaluacion = 0;
       
-      // Contabilizar por criterio
       const conteosCriterio = {};
       rubrica.forEach(criterio => {
         conteosCriterio[criterio.criterio] = 0;
@@ -120,18 +112,15 @@ const PantallaEstadisticas = ({ navigation }) => {
         
         puntajeEvaluacion += nota.valor;
         
-        // Sumar al criterio correspondiente
         porCriterio[indicador.criterio].totalPuntos += nota.valor;
         conteosCriterio[indicador.criterio]++;
         
-        // Determinar la calificación para contar distribución
         const opcion = indicador.opciones.find(o => o.value === nota.valor);
         if (opcion) {
           conteoOpciones[opcion.label]++;
         }
       });
       
-      // Marcar los criterios que tienen todos sus indicadores evaluados
       Object.keys(conteosCriterio).forEach(criterio => {
         if (conteosCriterio[criterio] === porCriterio[criterio].numeroIndicadores) {
           porCriterio[criterio].evaluacionesRealizadas++;
@@ -141,7 +130,6 @@ const PantallaEstadisticas = ({ navigation }) => {
       sumaPuntajes += puntajeEvaluacion;
     });
     
-    // Calcular promedios por criterio
     Object.keys(porCriterio).forEach(criterio => {
       if (porCriterio[criterio].evaluacionesRealizadas > 0) {
         porCriterio[criterio].promedio = 
@@ -149,7 +137,6 @@ const PantallaEstadisticas = ({ navigation }) => {
       }
     });
     
-    // Calcular promedio general
     const promedioGeneral = sumaPuntajes / evaluaciones.length;
     
     setEstadisticas({

@@ -8,11 +8,14 @@ import {
   Share,
   ActivityIndicator,
   Alert,
+  TextInput,
+  Modal,
 } from 'react-native';
 import { colores, estilosGlobales } from '../estilos/estilosGlobales';
 import Cabecera from '../componentes/Cabecera';
 import { obtenerEvaluacionPorId, obtenerRubricaCompleta } from '../basedatos/rubricaServicio';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons, Feather } from '@expo/vector-icons';
+import { generarYCompartirPDF, enviarCorreoConPDF } from '../servicios/emailPdfServicio';
 
 /**
  * Pantalla que muestra el detalle de una evaluación
@@ -27,11 +30,13 @@ const PantallaDetalleEvaluacion = ({ route, navigation }) => {
   const [rubrica, setRubrica] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [detallesIndicadores, setDetallesIndicadores] = useState({});
+  const [modalVisible, setModalVisible] = useState(false);
+  const [correoDestino, setCorreoDestino] = useState('');
+  const [enviandoEmail, setEnviandoEmail] = useState(false);
 
   useEffect(() => {
     const cargarDatos = async () => {
       try {
-        // Obtener la evaluación por su ID
         const datosEvaluacion = await obtenerEvaluacionPorId(evaluacionId);
         
         if (!datosEvaluacion) {
@@ -40,10 +45,8 @@ const PantallaDetalleEvaluacion = ({ route, navigation }) => {
           return;
         }
         
-        // Obtener la rúbrica completa para mostrar los detalles
         const datosRubrica = await obtenerRubricaCompleta();
         
-        // Crear un mapa para facilitar la búsqueda de indicadores y opciones
         const mapaDetalles = {};
         datosRubrica.forEach(criterio => {
           criterio.indicadores.forEach(indicador => {
@@ -109,7 +112,6 @@ const PantallaDetalleEvaluacion = ({ route, navigation }) => {
       mensaje += `📅 Fecha: ${fecha}\n\n`;
       mensaje += `*PUNTAJE TOTAL: ${puntajeTotal}*\n\n`;
       
-      // Agrupar por criterio
       const notasPorCriterio = {};
       
       evaluacion.notas.forEach(nota => {
@@ -128,7 +130,6 @@ const PantallaDetalleEvaluacion = ({ route, navigation }) => {
         });
       });
       
-      // Generar mensaje por criterio
       Object.entries(notasPorCriterio).forEach(([criterio, notas]) => {
         mensaje += `*${criterio}*\n`;
         
@@ -147,6 +148,99 @@ const PantallaDetalleEvaluacion = ({ route, navigation }) => {
     } catch (error) {
       console.error('Error al compartir evaluación:', error);
       Alert.alert('Error', 'No se pudo compartir la evaluación');
+    }
+  };
+
+  const prepararDatosParaPDF = () => {
+    if (!evaluacion) return null;
+    
+    const datosEvaluacion = {
+      ...evaluacion,
+      notaFinal: calcularPuntajeTotal(),
+      resultados: []
+    };
+    
+    evaluacion.notas.forEach(nota => {
+      const indicadorId = nota.indicadorId;
+      const valorSeleccionado = nota.valor;
+      
+      for (const criterio of rubrica) {
+        const indicador = criterio.indicadores.find(i => i.id === indicadorId);
+        
+        if (indicador) {
+          datosEvaluacion.resultados.push({
+            criterio: criterio.criterio,
+            indicador: indicador,
+            valorSeleccionado: valorSeleccionado
+          });
+          break;
+        }
+      }
+    });
+    
+    return datosEvaluacion;
+  };
+
+  const generarPDF = async () => {
+    try {
+      const datosParaPDF = prepararDatosParaPDF();
+      
+      if (!datosParaPDF) {
+        Alert.alert('Error', 'No se pudieron preparar los datos de la evaluación');
+        return;
+      }
+      
+      const resultado = await generarYCompartirPDF(datosParaPDF);
+      
+      if (!resultado) {
+        Alert.alert('Error', 'No se pudo generar el PDF de la evaluación');
+      }
+    } catch (error) {
+      console.error('Error al generar PDF:', error);
+      Alert.alert('Error', 'Ocurrió un problema al generar el PDF');
+    }
+  };
+
+  const mostrarModalCorreo = () => {
+    setModalVisible(true);
+  };
+
+  const enviarPorCorreo = async () => {
+    if (!correoDestino.trim()) {
+      Alert.alert('Error', 'Por favor ingrese una dirección de correo válida');
+      return;
+    }
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(correoDestino)) {
+      Alert.alert('Error', 'Por favor ingrese una dirección de correo electrónico válida');
+      return;
+    }
+    
+    try {
+      setEnviandoEmail(true);
+      const datosParaPDF = prepararDatosParaPDF();
+      
+      if (!datosParaPDF) {
+        Alert.alert('Error', 'No se pudieron preparar los datos de la evaluación');
+        setEnviandoEmail(false);
+        return;
+      }
+      
+      const resultado = await enviarCorreoConPDF(datosParaPDF, correoDestino);
+      
+      setEnviandoEmail(false);
+      if (resultado) {
+        setModalVisible(false);
+        setCorreoDestino('');
+        Alert.alert('Éxito', 'El correo con la evaluación ha sido enviado correctamente');
+      } else {
+        Alert.alert('Error', 'No se pudo enviar el correo. Intente nuevamente.');
+      }
+    } catch (error) {
+      console.error('Error al enviar correo:', error);
+      setEnviandoEmail(false);
+      Alert.alert('Error', 'Ocurrió un problema al enviar el correo');
     }
   };
 
@@ -211,7 +305,6 @@ const PantallaDetalleEvaluacion = ({ route, navigation }) => {
           <Text style={styles.tituloSeccion}>Resultados por Criterio</Text>
           
           {rubrica.map((criterio) => {
-            // Filtrar las notas que pertenecen a este criterio
             const notasCriterio = evaluacion.notas.filter(nota => {
               const indicador = criterio.indicadores.find(i => i.id === nota.indicadorId);
               return !!indicador;
@@ -247,14 +340,71 @@ const PantallaDetalleEvaluacion = ({ route, navigation }) => {
           })}
         </View>
         
-        <TouchableOpacity
-          style={styles.botonCompartir}
-          onPress={compartirEvaluacion}
-        >
-          <MaterialIcons name="share" size={20} color={colores.textoClaro} />
-          <Text style={styles.textoBotonCompartir}>Compartir Evaluación</Text>
-        </TouchableOpacity>
+        <View style={styles.botonesContainer}>
+          
+          
+          <TouchableOpacity
+            style={styles.botonPDF}
+            onPress={generarPDF}
+          >
+            <MaterialIcons name="picture-as-pdf" size={20} color={colores.textoClaro} />
+            <Text style={styles.textoBotonCompartir}>Ver PDF</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={styles.botonEmail}
+            onPress={mostrarModalCorreo}
+          >
+            <MaterialIcons name="email" size={20} color={colores.textoClaro} />
+            <Text style={styles.textoBotonCompartir}>Enviar por Email</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
+      
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity 
+              style={styles.closeButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Feather name="x" size={24} color={colores.texto} />
+            </TouchableOpacity>
+            
+            <Text style={styles.modalTitle}>Enviar PDF por correo</Text>
+            <Text style={styles.modalSubtitle}>Ingrese la dirección de correo electrónico donde desea enviar la evaluación:</Text>
+            
+            <TextInput
+              style={styles.emailInput}
+              placeholder="correo@ejemplo.com"
+              value={correoDestino}
+              onChangeText={setCorreoDestino}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+            
+            <TouchableOpacity
+              style={[styles.botonEnviarEmail, enviandoEmail && styles.botonDeshabilitado]}
+              onPress={enviarPorCorreo}
+              disabled={enviandoEmail}
+            >
+              {enviandoEmail ? (
+                <ActivityIndicator size="small" color={colores.textoClaro} />
+              ) : (
+                <>
+                  <MaterialIcons name="send" size={20} color={colores.textoClaro} />
+                  <Text style={styles.textoBotonEnviar}>Enviar</Text>
+                </>
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -380,21 +530,101 @@ const styles = StyleSheet.create({
     color: '#757575',
     marginTop: 2,
   },
+  botonesContainer: {
+    flexDirection: 'column',
+    marginTop: 16,
+    gap: 12,
+  },
   botonCompartir: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colores.secundario,
     borderRadius: 8,
-    padding: 14,
-    marginTop: 8,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 3,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    elevation: 2,
+  },
+  botonPDF: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F44336',
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    elevation: 2,
+  },
+  botonEmail: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colores.primario,
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    elevation: 2,
   },
   textoBotonCompartir: {
+    color: colores.textoClaro,
+    fontWeight: 'bold',
+    fontSize: 16,
+    marginLeft: 8,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    paddingHorizontal: 20,
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 24,
+    width: '100%',
+    elevation: 5,
+    position: 'relative',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    padding: 8,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: colores.texto,
+    marginBottom: 12,
+  },
+  modalSubtitle: {
+    fontSize: 16,
+    color: colores.textoSecundario,
+    marginBottom: 24,
+  },
+  emailInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    marginBottom: 24,
+  },
+  botonEnviarEmail: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colores.primario,
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  botonDeshabilitado: {
+    opacity: 0.6,
+  },
+  textoBotonEnviar: {
     color: colores.textoClaro,
     fontWeight: 'bold',
     fontSize: 16,
