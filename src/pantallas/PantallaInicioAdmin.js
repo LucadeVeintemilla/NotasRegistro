@@ -1,27 +1,12 @@
 import { MaterialIcons } from '@expo/vector-icons';
-import React, { useEffect, useState } from 'react';
-import {
-    Alert,
-    Platform,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
-} from 'react-native';
+import { useEffect, useState } from 'react';
+import { Alert, Platform, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../contextos/AuthContext';
 import { colores } from '../estilos/estilosGlobales';
 import { getCurrentUser, logout } from '../servicios/auth/authService';
 
-/**
- * Pantalla principal que muestra la pantalla de inicio con opciones de navegación
- * @param {Object} props Propiedades del componente
- * @param {Object} props.navigation Objeto de navegación
- * @returns {React.Component} Componente de pantalla de inicio
- */
-const PantallaInicio = ({ navigation }) => {
+const PantallaInicioAdmin = ({ navigation }) => {
   const [usuario, setUsuario] = useState(null);
   const auth = useAuth(); 
 
@@ -47,6 +32,7 @@ const PantallaInicio = ({ navigation }) => {
           text: 'Cerrar Sesión',
           onPress: async () => {
             await logout();
+            
             auth.refreshAuth();
           }
         }
@@ -58,7 +44,7 @@ const PantallaInicio = ({ navigation }) => {
     <SafeAreaView style={styles.container} edges={['right', 'left', 'bottom']}>
       <StatusBar backgroundColor={colores.primario} barStyle="light-content" />
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Panel de Director</Text>
+        <Text style={styles.headerTitle}>Panel de Administrador</Text>
         <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
           <MaterialIcons name="exit-to-app" size={24} color={colores.textoClaro} />
         </TouchableOpacity>
@@ -67,35 +53,13 @@ const PantallaInicio = ({ navigation }) => {
       <ScrollView style={styles.content}>
         <View style={styles.welcomeSection}>
           <Text style={styles.welcomeText}>Bienvenido/a,</Text>
-          <Text style={styles.userName}>{usuario ? `${usuario.nombre} ${usuario.apellido}` : 'Director'}</Text>
-          <Text style={styles.userRole}>Director del Sistema</Text>
+          <Text style={styles.userName}>{usuario ? `${usuario.nombre} ${usuario.apellido}` : 'Administrador'}</Text>
+          <Text style={styles.userRole}>Administrador del Sistema</Text>
         </View>
 
         <View style={styles.cardSection}>
           <Text style={styles.sectionTitle}>Gestión de Evaluaciones</Text>
           
-          <TouchableOpacity
-            style={[styles.card, { backgroundColor: colores.primario }]}
-            onPress={() => navigation.navigate('PantallaNuevaEvaluacion')}
-          >
-            <MaterialIcons name="add-circle" size={28} color="#fff" />
-            <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>Nueva Evaluación</Text>
-              <Text style={styles.cardDescription}>Registra una nueva evaluación para un estudiante</Text>
-            </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.card, { backgroundColor: colores.secundario }]}
-            onPress={() => navigation.navigate('PantallaBuscarEvaluaciones')}
-          >
-            <MaterialIcons name="search" size={28} color="#fff" />
-            <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>Buscar Evaluaciones</Text>
-              <Text style={styles.cardDescription}>Consulta evaluaciones realizadas anteriormente</Text>
-            </View>
-          </TouchableOpacity>
-
           <TouchableOpacity
             style={[styles.card, { backgroundColor: colores.primario }]}
             onPress={() => navigation.navigate('CrearEstudiante')}
@@ -253,4 +217,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PantallaInicio;
+export default PantallaInicioAdmin;

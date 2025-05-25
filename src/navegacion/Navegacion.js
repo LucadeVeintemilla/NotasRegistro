@@ -1,12 +1,14 @@
-import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import React from 'react';
 
-import PantallaInicio from '../pantallas/PantallaInicio';
-import PantallaNuevaEvaluacion from '../pantallas/PantallaNuevaEvaluacion';
+import PantallaAsignarHorario from '../pantallas/PantallaAsignarHorario';
+import PantallaBuscarEvaluaciones from '../pantallas/PantallaBuscarEvaluaciones';
+import PantallaCrearEstudiante from '../pantallas/PantallaCrearEstudiante';
 import PantallaDetalleEvaluacion from '../pantallas/PantallaDetalleEvaluacion';
 import PantallaEstadisticas from '../pantallas/PantallaEstadisticas';
-import PantallaBuscarEvaluaciones from '../pantallas/PantallaBuscarEvaluaciones';
+import PantallaInicio from '../pantallas/PantallaInicio';
+import PantallaNuevaEvaluacion from '../pantallas/PantallaNuevaEvaluacion';
 
 const Stack = createNativeStackNavigator();
 
@@ -16,19 +18,19 @@ const Stack = createNativeStackNavigator();
  */
 const Navegacion = () => {
   return (
-    <NavigationContainer>
-      <Stack.Navigator
-        initialRouteName="Inicio"
+    <NavigationContainer>      <Stack.Navigator
+        initialRouteName="PantallaInicio"
         screenOptions={{
           headerShown: false,
           animation: 'slide_from_right',
         }}
-      >
-        <Stack.Screen name="Inicio" component={PantallaInicio} />
-        <Stack.Screen name="NuevaEvaluacion" component={PantallaNuevaEvaluacion} />
-        <Stack.Screen name="DetalleEvaluacion" component={PantallaDetalleEvaluacion} />
-        <Stack.Screen name="Estadisticas" component={PantallaEstadisticas} />
-        <Stack.Screen name="BuscarEvaluaciones" component={PantallaBuscarEvaluaciones} />
+      >        <Stack.Screen name="PantallaInicio" component={PantallaInicio} />
+        <Stack.Screen name="PantallaNuevaEvaluacion" component={PantallaNuevaEvaluacion} />
+        <Stack.Screen name="PantallaDetalleEvaluacion" component={PantallaDetalleEvaluacion} />
+        <Stack.Screen name="PantallaEstadisticas" component={PantallaEstadisticas} />
+        <Stack.Screen name="PantallaBuscarEvaluaciones" component={PantallaBuscarEvaluaciones} />
+        <Stack.Screen name="PantallaCrearEstudiante" component={PantallaCrearEstudiante} />
+        <Stack.Screen name="PantallaAsignarHorario" component={PantallaAsignarHorario} />
       </Stack.Navigator>
     </NavigationContainer>
   );

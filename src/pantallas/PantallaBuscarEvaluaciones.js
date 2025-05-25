@@ -1,18 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  FlatList, 
-  TouchableOpacity, 
-  StyleSheet, 
+import { Feather } from '@expo/vector-icons';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import {
   ActivityIndicator,
   Alert,
-  TextInput
+  FlatList,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
-import { colores, estilosGlobales } from '../estilos/estilosGlobales';
 import Cabecera from '../componentes/Cabecera';
-import { Feather } from '@expo/vector-icons';
-import { obtenerEvaluaciones } from '../basedatos/rubricaServicio';
+import { colores, estilosGlobales } from '../estilos/estilosGlobales';
+import { getCurrentUser, setAuthToken } from '../servicios/auth/authService';
 
 /**
  * Pantalla para buscar y filtrar evaluaciones
@@ -29,9 +30,28 @@ const PantallaBuscarEvaluaciones = ({ navigation }) => {
   const cargarEvaluaciones = async () => {
     setCargando(true);
     try {
-      const datos = await obtenerEvaluaciones();
-      setEvaluaciones(datos);
-      setEvaluacionesFiltradas(datos);
+      await setAuthToken();
+      const userData = await getCurrentUser();
+      
+      if (!userData || !userData.id) {
+        throw new Error('No se pudo obtener información del usuario');
+      }
+      
+      const response = await axios.get('http://192.168.100.35:3000/api/evaluaciones');
+      
+      let evaluacionesPermitidas = response.data.data;
+      
+      if (userData.tipo === 'lector') {
+        evaluacionesPermitidas = evaluacionesPermitidas.filter(
+          evaluacion => 
+            (evaluacion.evaluador && evaluacion.evaluador._id === userData.id) ||
+            evaluacion.createdBy === userData.id
+        );
+      }
+      
+      
+      setEvaluaciones(evaluacionesPermitidas);
+      setEvaluacionesFiltradas(evaluacionesPermitidas);
     } catch (error) {
       console.error('Error al cargar evaluaciones:', error);
       Alert.alert('Error', 'No se pudieron cargar las evaluaciones');
@@ -63,23 +83,36 @@ const PantallaBuscarEvaluaciones = ({ navigation }) => {
       evaluacion.estudiante?.apellido?.toLowerCase().includes(textoLower)
     );
     
-    setEvaluacionesFiltradas(filtradas);
-  };
-
+    setEvaluacionesFiltradas(filtradas);  };
   const renderItem = ({ item }) => {
     const fecha = new Date(item.fecha).toLocaleDateString();
+    const ahora = new Date();
+    const inicio = new Date(item.horarioInicio);
+    const fin = new Date(item.horarioFin);
+    const estaDisponible = ahora >= inicio && ahora <= fin;
     
     return (
       <TouchableOpacity
-        style={styles.tarjetaEvaluacion}
-        onPress={() => navigation.navigate('DetalleEvaluacion', { evaluacionId: item.id })}
+        style={[
+          styles.tarjetaEvaluacion,
+          !estaDisponible && styles.tarjetaNoDisponible        ]}
+        onPress={() => navigation.navigate('PantallaDetalleEvaluacion', { evaluacionId: item._id })}
       >
         <View style={styles.contenidoTarjeta}>
           <View style={styles.infoEvaluacion}>
             <Text style={styles.tituloEvaluacion}>{item.titulo}</Text>
             <Text style={styles.fechaEvaluacion}>{fecha}</Text>
             <Text style={styles.estudianteEvaluacion}>
-              {`${item.estudiante?.nombre || ''} ${item.estudiante?.apellido || ''}`}
+              {item.estudiante?.nombre || ''} {item.estudiante?.apellido || ''}
+            </Text>
+            <Text style={[styles.estadoEvaluacion, { color: item.estado === 'completada' ? colores.primario : colores.secundario }]}>
+              {item.estado}
+            </Text>
+            <Text style={[
+              styles.disponibilidadTexto,
+              { color: estaDisponible ? colores.primario : colores.error }
+            ]}>
+              {estaDisponible ? '✓ Disponible ahora' : '✗ Fuera del horario permitido'}
             </Text>
           </View>
           
@@ -96,12 +129,12 @@ const PantallaBuscarEvaluaciones = ({ navigation }) => {
     <View style={styles.contenedorVacio}>
       <Feather name="search" size={64} color={colores.texto + '80'} />
       <Text style={styles.textoVacio}>
-        {textoBusqueda ? 'No se encontraron resultados' : 'No hay evaluaciones registradas'}
+        {textoBusqueda ? 'No se encontraron resultados' : 'No hay evaluaciones asignadas'}
       </Text>
       <Text style={styles.subtextoVacio}>
         {textoBusqueda 
           ? 'Intenta con otros términos de búsqueda'
-          : 'Crea una nueva evaluación desde la pantalla principal'
+          : 'Las evaluaciones que te sean asignadas aparecerán aquí'
         }
       </Text>
     </View>
@@ -110,7 +143,7 @@ const PantallaBuscarEvaluaciones = ({ navigation }) => {
   return (
     <View style={estilosGlobales.contenedor}>
       <Cabecera 
-        titulo="Buscar Evaluaciones" 
+        titulo="Mis Evaluaciones" 
         onAtras={() => navigation.goBack()}
       />
       
@@ -141,7 +174,7 @@ const PantallaBuscarEvaluaciones = ({ navigation }) => {
       ) : (
         <FlatList
           data={evaluacionesFiltradas}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item._id}
           renderItem={renderItem}
           contentContainerStyle={styles.listaContenido}
           ListEmptyComponent={ListaVacia}
@@ -191,6 +224,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3,
   },
+  tarjetaNoDisponible: {
+    opacity: 0.7,
+    borderColor: colores.error,
+    borderWidth: 1,
+  },
   contenidoTarjeta: {
     padding: 16,
     flexDirection: 'row',
@@ -213,6 +251,17 @@ const styles = StyleSheet.create({
   estudianteEvaluacion: {
     fontSize: 16,
     color: colores.texto,
+    marginBottom: 4,
+  },
+  estadoEvaluacion: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    textTransform: 'capitalize',
+  },
+  disponibilidadTexto: {
+    fontSize: 13,
+    marginTop: 4,
+    fontStyle: 'italic',
   },
   notaContainer: {
     justifyContent: 'center',

@@ -342,7 +342,7 @@ Nota Final: ${evaluacion.notaFinal.toFixed(2)}`;
     
     const emailData = {
       to: correoDestino,
-      from: 'registronotas2025@gmail.com', // Correo verificado en SendGrid
+      from: 'registronotas2025@gmail.com', 
       subject: asunto,
       text: cuerpo,
       html: `<p>${cuerpo.replace(/\n/g, '<br>')}</p>`,

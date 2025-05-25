@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, StatusBar } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, StatusBar, Platform } from 'react-native';
 import { colores } from '../estilos/estilosGlobales';
 import { AntDesign } from '@expo/vector-icons';
 
@@ -32,7 +32,7 @@ const Cabecera = ({ titulo, onAtras }) => {
 const styles = StyleSheet.create({
   contenedor: {
     backgroundColor: colores.primario,
-    paddingTop: 50, 
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight + 5 : 50, 
     elevation: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },

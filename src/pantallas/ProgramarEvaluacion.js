@@ -1,0 +1,591 @@
+import { MaterialIcons } from '@expo/vector-icons';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Picker } from '@react-native-picker/picker';
+import axios from 'axios';
+import { colores } from '../estilos/estilosGlobales';
+import { getCurrentUser, setAuthToken } from '../servicios/auth/authService';
+
+const ProgramarEvaluacion = ({ route, navigation }) => {
+  const estudianteSeleccionado = route.params?.estudiante;
+  
+  const [estudiantes, setEstudiantes] = useState([]);
+  const [evaluadores, setEvaluadores] = useState([]);
+  const [cargando, setCargando] = useState(false);
+  const [cargandoDatos, setCargandoDatos] = useState(true);
+  
+  const [formData, setFormData] = useState({
+    estudiante: estudianteSeleccionado?._id || '',
+    evaluador: '',
+    titulo: estudianteSeleccionado?.tesis || '',
+    horarioInicio: new Date(),
+    horarioFin: new Date(new Date().getTime() + 60 * 60 * 1000), 
+    notaFinal: 0, 
+    estado: 'pendiente' 
+  });
+  
+  const [mostrarSelectorInicio, setMostrarSelectorInicio] = useState(false);
+  const [mostrarSelectorFin, setMostrarSelectorFin] = useState(false);
+
+  useEffect(() => {
+    cargarDatos();
+  }, []);
+
+  const cargarDatos = async () => {
+    try {
+      setCargandoDatos(true);
+      await setAuthToken();
+      
+      const respEstudiantes = await axios.get('http://192.168.100.35:3000/api/estudiantes');
+      setEstudiantes(respEstudiantes.data.data);
+      
+      const respUsuarios = await axios.get('http://192.168.100.35:3000/api/auth/usuarios?tipo=lector');
+      setEvaluadores(respUsuarios.data.data);
+      
+      if (estudianteSeleccionado) {
+        setFormData(prev => ({
+          ...prev,
+          estudiante: estudianteSeleccionado._id,
+          titulo: estudianteSeleccionado.tesis
+        }));
+      }
+    } catch (error) {
+      console.error('Error al cargar datos:', error);
+      Alert.alert('Error', 'No se pudieron cargar los datos necesarios');
+    } finally {
+      setCargandoDatos(false);
+    }
+  };
+
+  const handleChange = (name, value) => {
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+  };
+
+  const ajustarFecha = (campo, unidad, cantidad) => {
+    try {
+      const fechaActual = new Date(formData[campo].getTime());
+      
+      if (unidad === 'day') {
+        fechaActual.setDate(fechaActual.getDate() + cantidad);
+      } else if (unidad === 'hour') {
+        fechaActual.setHours(fechaActual.getHours() + cantidad);
+      } else if (unidad === 'minute') {
+        fechaActual.setMinutes(fechaActual.getMinutes() + cantidad);
+      }
+      
+      if (campo === 'horarioInicio') {
+        const horarioFin = formData.horarioFin;
+        
+        if (fechaActual >= horarioFin) {
+          const nuevaFechaFin = new Date(fechaActual.getTime() + 60 * 60 * 1000);
+          setFormData({
+            ...formData,
+            horarioInicio: fechaActual,
+            horarioFin: nuevaFechaFin
+          });
+        } else {
+         
+          setFormData({
+            ...formData,
+            horarioInicio: fechaActual
+          });
+        }
+      } else if (campo === 'horarioFin') {
+        const horarioInicio = formData.horarioInicio;
+        
+        if (fechaActual <= horarioInicio) {
+          Alert.alert('Error', 'La fecha de fin debe ser posterior a la de inicio');
+        } else {
+          setFormData({
+            ...formData,
+            horarioFin: fechaActual
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error al ajustar fecha:', error);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!formData.estudiante || !formData.evaluador || !formData.titulo) {
+      return Alert.alert('Error', 'Todos los campos son obligatorios');
+    }
+
+    if (formData.horarioInicio >= formData.horarioFin) {
+      return Alert.alert('Error', 'La hora de fin debe ser posterior a la hora de inicio');
+    }
+
+    try {
+      setCargando(true);
+      await setAuthToken();
+
+      const currentUser = await getCurrentUser(); 
+
+      const dataToSubmit = {
+        estudiante: formData.estudiante,
+        evaluador: formData.evaluador,
+        titulo: formData.titulo,
+        notaFinal: 0,
+        horarioInicio: formData.horarioInicio.toISOString(),
+        horarioFin: formData.horarioFin.toISOString(),
+        estado: 'pendiente',
+        fecha: new Date().toISOString(),
+        resultados: [], 
+        createdBy: currentUser?._id 
+      };
+      
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${await AsyncStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      };
+
+      const response = await axios.post(
+        'http://192.168.100.35:3000/api/evaluaciones',
+        dataToSubmit,
+        config
+      );
+      
+      Alert.alert(
+        'Éxito',
+        'Evaluación programada correctamente',
+        [
+          {
+            text: 'OK',
+            onPress: () => navigation.navigate('PantallaInicio')
+          }
+        ]
+      );
+    } catch (error) {
+      console.error('Error al programar evaluación:', error);
+      const mensaje = error.response?.data?.message || 'Error al programar la evaluación';
+      Alert.alert('Error', mensaje);
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  const formatDateTime = (date) => {
+    return date.toLocaleString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const formatearHora = (fecha) => {
+    return fecha.toLocaleTimeString().substring(0, 5);
+  };
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <MaterialIcons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Programar Evaluación</Text>
+        <View style={{ width: 24 }} />
+      </View>
+
+      {cargandoDatos ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colores.primario} />
+          <Text style={styles.loadingText}>Cargando datos...</Text>
+        </View>
+      ) : (
+        <ScrollView style={styles.content}>
+          <View style={styles.formContainer}>
+            <Text style={styles.formTitle}>Detalles de la Evaluación</Text>
+            <Text style={styles.formDescription}>Configure el horario y asigne un evaluador</Text>
+            
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Estudiante</Text>
+              <View style={styles.pickerContainer}>
+                <Picker
+                  selectedValue={formData.estudiante}
+                  style={styles.picker}
+                  onValueChange={(value) => handleChange('estudiante', value)}
+                  enabled={!estudianteSeleccionado}
+                >
+                  <Picker.Item label="Seleccione un estudiante" value="" />
+                  {estudiantes.map(estudiante => (
+                    <Picker.Item 
+                      key={estudiante._id} 
+                      label={`${estudiante.nombre} ${estudiante.apellido} (${estudiante.codigo})`} 
+                      value={estudiante._id} 
+                    />
+                  ))}
+                </Picker>
+              </View>
+            </View>
+            
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Evaluador (Lector)</Text>
+              <View style={styles.pickerContainer}>
+                <Picker
+                  selectedValue={formData.evaluador}
+                  style={styles.picker}
+                  onValueChange={(value) => handleChange('evaluador', value)}
+                >
+                  <Picker.Item label="Seleccione un evaluador" value="" />
+                  {evaluadores.map(evaluador => (
+                    <Picker.Item 
+                      key={evaluador._id} 
+                      label={`${evaluador.nombre} ${evaluador.apellido}`} 
+                      value={evaluador._id} 
+                    />
+                  ))}
+                </Picker>
+              </View>
+            </View>
+            
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>Título de la Evaluación</Text>
+              <TouchableOpacity 
+                style={styles.input}
+                onPress={() => {
+                  if (formData.estudiante) {
+                    const estudiante = estudiantes.find(e => e._id === formData.estudiante);
+                    if (estudiante) {
+                      handleChange('titulo', estudiante.tesis);
+                    }
+                  }
+                }}
+              >
+                <Text style={formData.titulo ? styles.inputText : styles.inputPlaceholder}>
+                  {formData.titulo || 'Título de la evaluación (click para usar título de tesis)'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            
+            <View style={styles.dateTimeSection}>
+              <Text style={styles.sectionTitle}>Rango Horario</Text>
+              
+              <View style={styles.campo}>
+                <Text style={styles.etiqueta}>Hora de Inicio:</Text>
+                <TouchableOpacity
+                  style={styles.selectorFecha}
+                  onPress={() => setMostrarSelectorInicio(true)}
+                >
+                  <Text style={styles.textoSelector}>{formatearHora(formData.horarioInicio)}</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.campo}>
+                <Text style={styles.etiqueta}>Hora de Fin:</Text>
+                <TouchableOpacity
+                  style={styles.selectorFecha}
+                  onPress={() => setMostrarSelectorFin(true)}
+                >
+                  <Text style={styles.textoSelector}>{formatearHora(formData.horarioFin)}</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {mostrarSelectorInicio && (
+              <DateTimePicker
+                value={formData.horarioInicio}
+                mode="time"
+                onChange={(event, selectedTime) => {
+                  setMostrarSelectorInicio(false);
+                  if (selectedTime) {
+                    setFormData({ ...formData, horarioInicio: selectedTime });
+                  }
+                }}
+              />
+            )}
+
+            {mostrarSelectorFin && (
+              <DateTimePicker
+                value={formData.horarioFin}
+                mode="time"
+                onChange={(event, selectedTime) => {
+                  setMostrarSelectorFin(false);
+                  if (selectedTime) {
+                    setFormData({ ...formData, horarioFin: selectedTime });
+                  }
+                }}
+              />
+            )}
+
+            <TouchableOpacity
+              style={[styles.botonGuardar, cargando && styles.botonDeshabilitado]}
+              onPress={handleSubmit}
+              disabled={cargando}
+            >
+              {cargando ? (
+                <ActivityIndicator size="small" color={colores.textoClaro} />
+              ) : (
+                <Text style={styles.textoBotonGuardar}>Programar Evaluación</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      )}
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  header: {
+    backgroundColor: colores.primario,
+    padding: 15,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+  },
+  headerTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  backButton: {
+    padding: 5,
+  },
+  content: {
+    flex: 1,
+    padding: 15,
+    paddingBottom: 80, 
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: colores.texto,
+  },
+  formContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 20,
+    marginBottom: 20,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+  formTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: colores.texto,
+    marginBottom: 5,
+  },
+  formDescription: {
+    fontSize: 14,
+    color: colores.textoSecundario,
+    marginBottom: 20,
+  },
+  inputGroup: {
+    marginBottom: 15,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 5,
+    color: colores.texto,
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 5,
+    backgroundColor: '#f9f9f9',
+  },
+  picker: {
+    height: 50,
+  },
+  input: {
+    backgroundColor: '#f9f9f9',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 5,
+    padding: 10,
+    minHeight: 50,
+    justifyContent: 'center',
+  },
+  inputText: {
+    fontSize: 16,
+    color: colores.texto,
+  },
+  inputPlaceholder: {
+    fontSize: 16,
+    color: '#aaa',
+  },
+  dateTimeSection: {
+    marginTop: 10,
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: colores.texto,
+    marginBottom: 5,
+  },
+  dateTimeDescription: {
+    fontSize: 14,
+    color: colores.textoSecundario,
+    marginBottom: 15,
+  },
+  dateTimeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  dateTimeGroup: {
+    flex: 1,
+    marginHorizontal: 5,
+  },
+  dateTimeLabel: {
+    fontSize: 14,
+    marginBottom: 5,
+    color: colores.texto,
+  },
+  fechasContainer: {
+    marginVertical: 10,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
+    padding: 10,
+  },
+  fechaItem: {
+    marginBottom: 15,
+  },
+  fechaLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    color: colores.texto,
+  },
+  fechaValor: {
+    fontSize: 16,
+    color: colores.texto,
+    backgroundColor: '#fff',
+    padding: 10,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    marginBottom: 10,
+  },
+  botonesAjuste: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  botonAjuste: {
+    backgroundColor: colores.primario,
+    padding: 8,
+    borderRadius: 5,
+    marginVertical: 5,
+    width: '31%',  
+    alignItems: 'center',
+  },
+  textoBotonAjuste: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  dateTimePicker: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f9f9f9',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 5,
+    padding: 10,
+  },
+  dateTimeText: {
+    fontSize: 14,
+    color: colores.texto,
+    marginLeft: 5,
+  },
+  iosDatePicker: {
+    marginTop: 10,
+    backgroundColor: '#f9f9f9',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 5,
+  },
+  submitContainer: {
+    backgroundColor: '#fff',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#ddd',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
+  submitButton: {
+    backgroundColor: colores.primario,
+    borderRadius: 5,
+    padding: 15,
+    alignItems: 'center',
+    marginTop: 10,
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  submitButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginLeft: 8,
+  },
+  selectorFecha: {
+    borderWidth: 1,
+    borderColor: colores.borde,
+    borderRadius: 4,
+    padding: 12,
+    backgroundColor: '#ffffff',
+  },
+  textoSelector: {
+    fontSize: 16,
+    color: colores.texto,
+  },
+  campo: {
+    marginBottom: 16,
+  },
+  etiqueta: {
+    fontSize: 16,
+    color: colores.texto,
+    marginBottom: 4,
+  },
+  botonGuardar: {
+    backgroundColor: colores.primario,
+    borderRadius: 5,
+    padding: 15,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  botonDeshabilitado: {
+    backgroundColor: '#ccc',
+  },
+  textoBotonGuardar: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+});
+
+export default ProgramarEvaluacion;
