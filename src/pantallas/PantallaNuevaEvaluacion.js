@@ -16,7 +16,8 @@ import { guardarEvaluacion, obtenerRubricaCompleta } from '../basedatos/rubricaS
 import Cabecera from '../componentes/Cabecera';
 import CriterioEvaluacion from '../componentes/CriterioEvaluacion';
 import { colores, estilosGlobales } from '../estilos/estilosGlobales';
-import { setAuthToken } from '../servicios/auth/authService';
+import { getCurrentUser, setAuthToken } from '../servicios/auth/authService';
+import { getApiUrl } from '../config/api';
 
 /**
  * Pantalla para registrar una nueva evaluación
@@ -45,39 +46,13 @@ const PantallaNuevaEvaluacion = ({ route, navigation }) => {
     const cargarDatos = async () => {
       try {
         setCargando(true);
-        
         const datosRubrica = await obtenerRubricaCompleta();
         setRubrica(datosRubrica);
         
         if (evaluacionId) {
-          try {
-            await setAuthToken();
-            
-            const response = await axios.get(
-              `http://192.168.100.35:3000/api/evaluaciones/${evaluacionId}`
-            );
-            
-            const evaluacion = response.data.data;
-            
-            if (evaluacion) {
-              setEsEditable(false);
-              
-              if (evaluacion.estudiante) {
-                setDatosEstudiante({
-                  nombre: evaluacion.estudiante.nombre || '',
-                  apellido: evaluacion.estudiante.apellido || '',
-                  codigo: evaluacion.estudiante.codigo || '',
-                  curso: evaluacion.estudiante.curso || '',
-                });
-              }
-              
-              setTitulo(evaluacion.titulo || '');
-            }
-          } catch (error) {
-            console.error('Error al cargar la evaluación:', error);
-            Alert.alert('Error de acceso', 'No tienes permisos para acceder a esta evaluación o ha ocurrido un error. Por favor, contacta al administrador.');
-            navigation.goBack();
-          }
+          await setAuthToken();
+          const response = await axios.get(getApiUrl(`/api/evaluaciones/${evaluacionId}`));
+          setEvaluacion(response.data.data);
         }
         
         setCargando(false);
@@ -148,22 +123,65 @@ const PantallaNuevaEvaluacion = ({ route, navigation }) => {
     setEnviando(true);
 
     try {
-      const notas = [];
+      await setAuthToken();
+      const userData = await getCurrentUser();
+      
+      if (!userData || !userData.id) {
+        throw new Error('No se pudo obtener información del usuario');
+      }
+
+      const estudianteResponse = await axios.post(
+        getApiUrl('/api/estudiantes'),
+        {
+          nombre: datosEstudiante.nombre,
+          apellido: datosEstudiante.apellido,
+          codigo: datosEstudiante.codigo,
+          curso: datosEstudiante.curso,
+          tesis: titulo
+        }
+      );
+
+      const resultadosFormateados = [];
       Object.entries(valoresSeleccionados).forEach(([indicadorId, valor]) => {
-        notas.push({
-          indicadorId: parseInt(indicadorId),
-          valor,
-        });
+        for (const criterio of rubrica) {
+          const indicador = criterio.indicadores.find(i => i.id === parseInt(indicadorId));
+          if (indicador) {
+            resultadosFormateados.push({
+              criterio: criterio.criterio,
+              indicador: {
+                id: parseInt(indicadorId),
+                nombre: indicador.nombre,
+                opciones: indicador.opciones
+              },
+              valorSeleccionado: valor
+            });
+            break;
+          }
+        }
       });
 
+      const ahora = new Date();
+      const horarioFin = new Date(ahora.getTime() + (30 * 60000)); 
+      
       const nuevaEvaluacion = {
-        titulo,
-        fecha: new Date().toISOString().split('T')[0],
-        estudiante: datosEstudiante,
-        notas,
+        estudiante: estudianteResponse.data.data._id,
+        evaluador: userData.id,
+        titulo: titulo,
+        notaFinal: parseFloat(puntajeTotal.toFixed(2)),
+        horarioInicio: ahora.toISOString(),
+        horarioFin: horarioFin.toISOString(),
+        estado: 'completada',
+        resultados: resultadosFormateados,
+        fecha: ahora.toISOString(),
+        createdBy: userData.id
       };
 
-      const evaluacionId = await guardarEvaluacion(nuevaEvaluacion);
+      console.log('Enviando evaluación:', JSON.stringify(nuevaEvaluacion, null, 2));
+
+      const evaluacionResponse = await axios.post(
+        getApiUrl('/api/evaluaciones'),
+        nuevaEvaluacion
+      );
 
       Alert.alert(
         'Éxito',
@@ -172,22 +190,40 @@ const PantallaNuevaEvaluacion = ({ route, navigation }) => {
           {
             text: 'Ver Detalle',
             onPress: () => {
-              navigation.replace('PantallaDetalleEvaluacion', { evaluacionId });
+              navigation.replace('PantallaDetalleEvaluacion', { 
+                evaluacionId: evaluacionResponse.data.data._id 
+              });
             },
           },
           {
             text: 'Volver al Inicio',
             onPress: () => {
-              navigation.navigate('PantallaInicio');
+              switch (userData.tipo) {
+                case 'director':
+                  navigation.navigate('PantallaInicio');
+                  break;
+                case 'lector':
+                  navigation.navigate('PantallaInicioLector');
+                  break;
+                default:
+                  navigation.goBack();
+              }
             },
           },
         ]
       );
 
-      setEnviando(false);
     } catch (error) {
       console.error('Error al guardar la evaluación:', error);
-      Alert.alert('Error', 'No se pudo guardar la evaluación. Por favor, intente nuevamente.');
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+      console.error('Error details:', error.response?.data?.message || error.message);
+      
+      Alert.alert(
+        'Error', 
+        `No se pudo guardar la evaluación. ${error.response?.data?.message || 'Verifique los datos e intente nuevamente.'}`
+      );
+    } finally {
       setEnviando(false);
     }
   };

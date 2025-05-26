@@ -2,6 +2,7 @@ import * as FileSystem from 'expo-file-system';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { Linking } from 'react-native';
+import { getApiUrl } from '../config/api';
 
 const API_URL = 'http://192.168.100.35:3000/api/email';
 
@@ -350,7 +351,7 @@ Nota Final: ${evaluacion.notaFinal.toFixed(2)}`;
       pdfName: nombreArchivo
     };
     
-    const response = await fetch(`${API_URL}/send`, {
+    const response = await fetch(getApiUrl('/api/email/send'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -369,5 +370,12 @@ Nota Final: ${evaluacion.notaFinal.toFixed(2)}`;
   } catch (error) {
     console.error('Error al enviar el correo:', error);
     return false;
+  }
+};
+
+const enviarCorreo = async (datos) => {
+  try {
+    const response = await axios.post(getApiUrl('/api/email'), datos);
+  } catch (error) {
   }
 };

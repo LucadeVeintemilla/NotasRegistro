@@ -14,6 +14,7 @@ import {
 import Cabecera from '../componentes/Cabecera';
 import { colores, estilosGlobales } from '../estilos/estilosGlobales';
 import { setAuthToken } from '../servicios/auth/authService';
+import { getApiUrl } from '../config/api';
 
 const PantallaAsignarHorario = ({ navigation }) => {
   const [horario, setHorario] = useState({
@@ -45,7 +46,7 @@ const PantallaAsignarHorario = ({ navigation }) => {
     setEnviando(true);
     try {
       await setAuthToken();
-      await axios.post('http://192.168.100.35:3000/api/horarios', horario);
+      await axios.post(getApiUrl('/api/horarios'), horario);
       Alert.alert(
         'Éxito',
         'Horario asignado correctamente',

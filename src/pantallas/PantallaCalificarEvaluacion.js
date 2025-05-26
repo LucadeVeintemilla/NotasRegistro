@@ -16,6 +16,7 @@ import Cabecera from '../componentes/Cabecera';
 import CriterioEvaluacion from '../componentes/CriterioEvaluacion';
 import { colores, estilosGlobales } from '../estilos/estilosGlobales';
 import { getCurrentUser, setAuthToken } from '../servicios/auth/authService';
+import { getApiUrl } from '../config/api';
 
 /**
  * Pantalla para que los lectores califiquen evaluaciones
@@ -65,7 +66,6 @@ const PantallaCalificarEvaluacion = ({ route, navigation }) => {
           if (evaluacionCompleta) {
             setEvaluacionData(evaluacionCompleta);
             
-            // Validar el rango horario al cargar la pantalla
             const ahora = new Date();
             const horarioInicio = new Date(evaluacionCompleta.horarioInicio);
             const horarioFin = new Date(evaluacionCompleta.horarioFin);
@@ -137,7 +137,6 @@ const PantallaCalificarEvaluacion = ({ route, navigation }) => {
   }, [valoresSeleccionados]);
 
   const validarCalificacion = () => {
-    // Validar que estemos dentro del rango horario permitido
     const ahora = new Date();
     const horarioInicio = new Date(evaluacionData.horarioInicio);
     const horarioFin = new Date(evaluacionData.horarioFin);
@@ -216,7 +215,7 @@ const PantallaCalificarEvaluacion = ({ route, navigation }) => {
               };
 
               const response = await axios.put(
-                `http://192.168.100.35:3000/api/evaluaciones/${evaluacionId}`,
+                getApiUrl(`/api/evaluaciones/${evaluacionId}`),
                 datosActualizacion
               );
 

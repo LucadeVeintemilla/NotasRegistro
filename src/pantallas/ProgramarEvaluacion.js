@@ -7,7 +7,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
 import { colores } from '../estilos/estilosGlobales';
-import { getCurrentUser, setAuthToken } from '../servicios/auth/authService';
+import { getCurrentUser, getUserRole, setAuthToken } from '../servicios/auth/authService';
+import { getApiUrl } from '../config/api';
 
 const ProgramarEvaluacion = ({ route, navigation }) => {
   const estudianteSeleccionado = route.params?.estudiante;
@@ -39,10 +40,10 @@ const ProgramarEvaluacion = ({ route, navigation }) => {
       setCargandoDatos(true);
       await setAuthToken();
       
-      const respEstudiantes = await axios.get('http://192.168.100.35:3000/api/estudiantes');
+      const respEstudiantes = await axios.get(getApiUrl('/api/estudiantes'));
       setEstudiantes(respEstudiantes.data.data);
       
-      const respUsuarios = await axios.get('http://192.168.100.35:3000/api/auth/usuarios?tipo=lector');
+      const respUsuarios = await axios.get(getApiUrl('/api/auth/usuarios?tipo=lector'));
       setEvaluadores(respUsuarios.data.data);
       
       if (estudianteSeleccionado) {
@@ -154,13 +155,29 @@ const ProgramarEvaluacion = ({ route, navigation }) => {
         config
       );
       
+      const userRole = await getUserRole();
+      
       Alert.alert(
         'Éxito',
         'Evaluación programada correctamente',
         [
           {
             text: 'OK',
-            onPress: () => navigation.navigate('PantallaInicio')
+            onPress: () => {
+              switch (userRole) {
+                case 'director':
+                  navigation.navigate('PantallaInicio');
+                  break;
+                case 'administrador':
+                  navigation.navigate('PantallaInicioAdmin');
+                  break;
+                case 'lector':
+                  navigation.navigate('PantallaInicioLector');
+                  break;
+                default:
+                  navigation.goBack();
+              }
+            }
           }
         ]
       );

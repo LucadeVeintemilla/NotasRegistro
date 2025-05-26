@@ -17,6 +17,7 @@ import Cabecera from '../componentes/Cabecera';
 import { colores, estilosGlobales } from '../estilos/estilosGlobales';
 import { setAuthToken } from '../servicios/auth/authService';
 import { enviarCorreoConPDF, generarYCompartirPDF } from '../servicios/emailPdfServicio';
+import { getApiUrl } from '../config/api';
 
 /**
  * Pantalla que muestra el detalle de una evaluación
@@ -39,7 +40,8 @@ const PantallaDetalleEvaluacion = ({ route, navigation }) => {
     const cargarDatos = async () => {
       try {
         setCargando(true);
-        await setAuthToken();        const response = await axios.get(`http://192.168.100.35:3000/api/evaluaciones/${evaluacionId}`);
+        await setAuthToken();
+        const response = await axios.get(getApiUrl(`/api/evaluaciones/${evaluacionId}`));
         setEvaluacion(response.data.data);
 
         const datosRubrica = await obtenerRubricaCompleta();

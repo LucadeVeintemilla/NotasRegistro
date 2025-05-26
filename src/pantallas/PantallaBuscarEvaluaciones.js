@@ -14,13 +14,8 @@ import {
 import Cabecera from '../componentes/Cabecera';
 import { colores, estilosGlobales } from '../estilos/estilosGlobales';
 import { getCurrentUser, setAuthToken } from '../servicios/auth/authService';
+import { getApiUrl } from '../config/api';
 
-/**
- * Pantalla para buscar y filtrar evaluaciones
- * @param {Object} props Propiedades del componente
- * @param {Object} props.navigation Objeto de navegación
- * @returns {React.Component} Componente de búsqueda de evaluaciones
- */
 const PantallaBuscarEvaluaciones = ({ navigation }) => {
   const [evaluaciones, setEvaluaciones] = useState([]);
   const [evaluacionesFiltradas, setEvaluacionesFiltradas] = useState([]);
@@ -37,7 +32,7 @@ const PantallaBuscarEvaluaciones = ({ navigation }) => {
         throw new Error('No se pudo obtener información del usuario');
       }
       
-      const response = await axios.get('http://192.168.100.35:3000/api/evaluaciones');
+      const response = await axios.get(getApiUrl('/api/evaluaciones'));
       
       let evaluacionesPermitidas = response.data.data;
       

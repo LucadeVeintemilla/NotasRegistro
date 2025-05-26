@@ -4,6 +4,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { colores } from '../estilos/estilosGlobales';
 import axios from 'axios';
 import { setAuthToken } from '../servicios/auth/authService';
+import { getApiUrl } from '../config/api';
 
 const CrearEstudiante = ({ navigation }) => {
   const [formData, setFormData] = useState({
@@ -32,7 +33,7 @@ const CrearEstudiante = ({ navigation }) => {
       await setAuthToken();
       
       const response = await axios.post(
-        'http://192.168.100.35:3000/api/estudiantes',
+        getApiUrl('/api/estudiantes'),
         formData
       );
       

@@ -1,11 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import { getApiUrl } from '../../config/api';
 
-const API_URL = 'http://192.168.100.35:3000/api/auth';
+const AUTH_BASE_PATH = '/api/auth';
 
 export const registro = async (userData) => {
   try {
-    const response = await axios.post(`${API_URL}/registro`, userData);
+    const response = await axios.post(getApiUrl(`${AUTH_BASE_PATH}/registro`), userData);
     
     if (response.data.token) {
       await AsyncStorage.setItem('token', response.data.token);
@@ -20,7 +21,7 @@ export const registro = async (userData) => {
 
 export const login = async (correo, contraseña) => {
   try {
-    const response = await axios.post(`${API_URL}/login`, {
+    const response = await axios.post(getApiUrl(`${AUTH_BASE_PATH}/login`), {
       correo,
       contraseña
     });

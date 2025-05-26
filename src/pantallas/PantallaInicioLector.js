@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../contextos/AuthContext';
 import { colores } from '../estilos/estilosGlobales';
 import { getCurrentUser, logout, setAuthToken } from '../servicios/auth/authService';
+import { getApiUrl } from '../config/api';
 
 const PantallaInicioLector = ({ navigation }) => {
   const [usuario, setUsuario] = useState(null);
@@ -18,7 +19,7 @@ const PantallaInicioLector = ({ navigation }) => {
       setCargando(true);
       await setAuthToken();
       
-      const response = await axios.get('http://192.168.100.35:3000/api/evaluaciones');
+      const response = await axios.get(getApiUrl('/api/evaluaciones'));
       
       const now = new Date();
       const pendientes = response.data.data.filter(evaluacion => {
