@@ -95,3 +95,14 @@ export const getUserRole = async () => {
     return null;
   }
 };
+
+export const registrarPorTecnico = async (userData) => {
+  try {
+    await setAuthToken();
+    
+    const response = await axios.post(getApiUrl(`${AUTH_BASE_PATH}/registro-tecnico`), userData);
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : new Error('Error en el servidor');
+  }
+};

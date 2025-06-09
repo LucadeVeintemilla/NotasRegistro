@@ -14,9 +14,11 @@ import PantallaEstadisticas from '../pantallas/PantallaEstadisticas';
 import PantallaInicio from '../pantallas/PantallaInicio';
 import PantallaInicioAdmin from '../pantallas/PantallaInicioAdmin';
 import PantallaInicioLector from '../pantallas/PantallaInicioLector';
+import PantallaInicioTecnico from '../pantallas/PantallaInicioTecnico';
 import PantallaLogin from '../pantallas/PantallaLogin';
 import PantallaNuevaEvaluacion from '../pantallas/PantallaNuevaEvaluacion';
 import PantallaRegistro from '../pantallas/PantallaRegistro';
+import PantallaRegistroUsuarios from '../pantallas/PantallaRegistroUsuarios';
 import ProgramarEvaluacion from '../pantallas/ProgramarEvaluacion';
 
 import { colores } from '../estilos/estilosGlobales';
@@ -65,6 +67,14 @@ const DirectorStack = () => (
     <Stack.Screen name="PantallaBuscarEvaluaciones" component={PantallaBuscarEvaluaciones} />
     <Stack.Screen name="PantallaDetalleEvaluacion" component={PantallaDetalleEvaluacion} />
     <Stack.Screen name="PantallaEstadisticas" component={PantallaEstadisticas} />
+    <Stack.Screen name="PantallaAyuda" component={PantallaAyuda} />
+  </Stack.Navigator>
+);
+
+const TecnicoStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="PantallaInicioTecnico" component={PantallaInicioTecnico} />
+    <Stack.Screen name="PantallaRegistroUsuarios" component={PantallaRegistroUsuarios} />
     <Stack.Screen name="PantallaAyuda" component={PantallaAyuda} />
   </Stack.Navigator>
 );
@@ -160,6 +170,7 @@ const NavegacionPrincipal = () => {
             {rol === 'administrador' && <AdminStack />}
             {rol === 'lector' && <LectorStack />}
             {rol === 'director' && <DirectorStack />}
+            {rol === 'tecnico' && <TecnicoStack />}
           </>
         )}
       </NavigationContainer>

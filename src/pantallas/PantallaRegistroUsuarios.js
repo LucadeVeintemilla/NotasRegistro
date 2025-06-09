@@ -1,10 +1,11 @@
 import { Picker } from '@react-native-picker/picker';
 import { useState } from 'react';
 import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useAuth } from '../contextos/AuthContext';
 import { colores } from '../estilos/estilosGlobales';
-import { registro } from '../servicios/auth/authService';
+import { registrarPorTecnico } from '../servicios/auth/authService';
 
-const PantallaRegistro = ({ navigation }) => {
+const PantallaRegistroUsuarios = ({ navigation }) => {
   const [formData, setFormData] = useState({
     nombre: '',
     apellido: '',
@@ -16,6 +17,7 @@ const PantallaRegistro = ({ navigation }) => {
     tipo: 'lector'
   });
   const [cargando, setCargando] = useState(false);
+  const auth = useAuth();
 
   const handleChange = (name, value) => {
     setFormData({
@@ -38,26 +40,39 @@ const PantallaRegistro = ({ navigation }) => {
       return Alert.alert('Error', 'La contraseña debe tener al menos 6 caracteres');
     }
 
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.correo)) {
       return Alert.alert('Error', 'El formato del correo electrónico no es válido');
+    }
+
+    if (formData.tipo !== 'lector' && formData.tipo !== 'director') {
+      return Alert.alert('Error', 'Solo puede registrar usuarios con rol de lector o director');
     }
 
     try {
       setCargando(true);
       
-        const { confirmarContraseña, ...datosRegistro } = formData;
+      const { confirmarContraseña, ...datosRegistro } = formData;
       
-      const data = await registro(datosRegistro);
+      const data = await registrarPorTecnico(datosRegistro);
       
       Alert.alert(
         'Registro exitoso',
-        'Se ha registrado correctamente',
+        `Se ha registrado un nuevo usuario con rol de ${formData.tipo}`,
         [
           {
             text: 'OK',
             onPress: () => {
-              navigation.navigate('PantallaLogin');
+              setFormData({
+                nombre: '',
+                apellido: '',
+                cedula: '',
+                correo: '',
+                telefono: '',
+                contraseña: '',
+                confirmarContraseña: '',
+                tipo: 'lector'
+              });
             }
           }
         ]
@@ -75,22 +90,24 @@ const PantallaRegistro = ({ navigation }) => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.logoContainer}>
-        <Image
-          style={styles.logo}
-          resizeMode="contain"
-        />
-        <Text style={styles.titulo}>Registro de Notas</Text>
+      <View style={styles.header}>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={styles.backButtonText}>Volver</Text>
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Registro de Usuarios</Text>
       </View>
       
       <View style={styles.formContainer}>
-        <Text style={styles.formTitulo}>Crear Cuenta</Text>
+        <Text style={styles.formTitulo}>Crear Nuevo Usuario</Text>
         
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Nombre</Text>
           <TextInput
             style={styles.input}
-            placeholder="Ingrese su nombre"
+            placeholder="Ingrese el nombre"
             value={formData.nombre}
             onChangeText={(value) => handleChange('nombre', value)}
           />
@@ -100,7 +117,7 @@ const PantallaRegistro = ({ navigation }) => {
           <Text style={styles.label}>Apellido</Text>
           <TextInput
             style={styles.input}
-            placeholder="Ingrese su apellido"
+            placeholder="Ingrese el apellido"
             value={formData.apellido}
             onChangeText={(value) => handleChange('apellido', value)}
           />
@@ -110,7 +127,7 @@ const PantallaRegistro = ({ navigation }) => {
           <Text style={styles.label}>Cédula</Text>
           <TextInput
             style={styles.input}
-            placeholder="Ingrese su número de cédula"
+            placeholder="Ingrese el número de cédula"
             keyboardType="number-pad"
             value={formData.cedula}
             onChangeText={(value) => handleChange('cedula', value)}
@@ -121,7 +138,7 @@ const PantallaRegistro = ({ navigation }) => {
           <Text style={styles.label}>Correo Electrónico</Text>
           <TextInput
             style={styles.input}
-            placeholder="Ingrese su correo"
+            placeholder="Ingrese el correo"
             keyboardType="email-address"
             autoCapitalize="none"
             value={formData.correo}
@@ -133,7 +150,7 @@ const PantallaRegistro = ({ navigation }) => {
           <Text style={styles.label}>Teléfono</Text>
           <TextInput
             style={styles.input}
-            placeholder="Ingrese su número de teléfono"
+            placeholder="Ingrese el número de teléfono"
             keyboardType="phone-pad"
             value={formData.telefono}
             onChangeText={(value) => handleChange('telefono', value)}
@@ -144,7 +161,7 @@ const PantallaRegistro = ({ navigation }) => {
           <Text style={styles.label}>Contraseña</Text>
           <TextInput
             style={styles.input}
-            placeholder="Ingrese su contraseña"
+            placeholder="Ingrese la contraseña"
             secureTextEntry
             value={formData.contraseña}
             onChangeText={(value) => handleChange('contraseña', value)}
@@ -155,7 +172,7 @@ const PantallaRegistro = ({ navigation }) => {
           <Text style={styles.label}>Confirmar Contraseña</Text>
           <TextInput
             style={styles.input}
-            placeholder="Confirme su contraseña"
+            placeholder="Confirme la contraseña"
             secureTextEntry
             value={formData.confirmarContraseña}
             onChangeText={(value) => handleChange('confirmarContraseña', value)}
@@ -171,9 +188,7 @@ const PantallaRegistro = ({ navigation }) => {
               onValueChange={(value) => handleChange('tipo', value)}
             >
               <Picker.Item label="Lector" value="lector" />
-              <Picker.Item label="Administrador" value="administrador" />
               <Picker.Item label="Director" value="director" />
-              <Picker.Item label="Técnico" value="tecnico" />
             </Picker>
           </View>
         </View>
@@ -186,16 +201,8 @@ const PantallaRegistro = ({ navigation }) => {
           {cargando ? (
             <ActivityIndicator color="#ffffff" />
           ) : (
-            <Text style={styles.textoBoton}>Registrarse</Text>
+            <Text style={styles.textoBoton}>Registrar Usuario</Text>
           )}
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.botonLogin}
-          onPress={() => navigation.navigate('PantallaLogin')}
-          disabled={cargando}
-        >
-          <Text style={styles.textoBotonLogin}>¿Ya tienes cuenta? Inicia sesión</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -206,86 +213,85 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     backgroundColor: '#f5f5f5',
-    padding: 20,
   },
-  logoContainer: {
+  header: {
+    backgroundColor: colores.primario,
+    padding: 15,
+    flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 20,
   },
-  logo: {
-    width: 100,
-    height: 100,
-    marginBottom: 10,
+  backButton: {
+    padding: 5,
+    marginRight: 10,
   },
-  titulo: {
-    fontSize: 22,
+  backButtonText: {
+    color: '#fff',
     fontWeight: 'bold',
-    color: colores.primario,
-    marginBottom: 5,
+    fontSize: 16,
+  },
+  headerTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
   formContainer: {
-    backgroundColor: '#ffffff',
-    borderRadius: 10,
+    flex: 1,
     padding: 20,
+    backgroundColor: '#fff',
+    marginHorizontal: 20,
+    marginVertical: 20,
+    borderRadius: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-    marginBottom: 20,
   },
   formTitulo: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
-    color: colores.texto,
     marginBottom: 20,
+    color: colores.primario,
     textAlign: 'center',
   },
   inputGroup: {
     marginBottom: 15,
   },
   label: {
-    fontSize: 16,
+    fontSize: 14,
     marginBottom: 5,
     color: colores.texto,
+    fontWeight: '500',
   },
   input: {
     backgroundColor: '#f9f9f9',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 5,
     padding: 10,
-    fontSize: 16,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
   },
   pickerContainer: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 5,
     backgroundColor: '#f9f9f9',
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
   },
   picker: {
     height: 50,
   },
   botonRegistro: {
     backgroundColor: colores.primario,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
     borderRadius: 5,
-    padding: 15,
     alignItems: 'center',
     marginTop: 10,
   },
   textoBoton: {
-    color: '#ffffff',
-    fontSize: 16,
+    color: '#fff',
     fontWeight: 'bold',
-  },
-  botonLogin: {
-    padding: 15,
-    alignItems: 'center',
-  },
-  textoBotonLogin: {
-    color: colores.primario,
-    fontSize: 14,
+    fontSize: 16,
   },
 });
 
-export default PantallaRegistro;
+export default PantallaRegistroUsuarios;
