@@ -28,8 +28,10 @@ const ProgramarEvaluacion = ({ route, navigation }) => {
     estado: 'pendiente' 
   });
   
-  const [mostrarSelectorInicio, setMostrarSelectorInicio] = useState(false);
-  const [mostrarSelectorFin, setMostrarSelectorFin] = useState(false);
+  const [mostrarSelectorInicioFecha, setMostrarSelectorInicioFecha] = useState(false);
+  const [mostrarSelectorInicioHora, setMostrarSelectorInicioHora] = useState(false);
+  const [mostrarSelectorFinFecha, setMostrarSelectorFinFecha] = useState(false);
+  const [mostrarSelectorFinHora, setMostrarSelectorFinHora] = useState(false);
 
   useEffect(() => {
     cargarDatos();
@@ -203,8 +205,14 @@ const ProgramarEvaluacion = ({ route, navigation }) => {
     });
   };
 
-  const formatearHora = (fecha) => {
-    return fecha.toLocaleTimeString().substring(0, 5);
+  const formatearFechaHora = (fecha) => {
+    return fecha.toLocaleString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   return (
@@ -292,50 +300,114 @@ const ProgramarEvaluacion = ({ route, navigation }) => {
             </View>
             
             <View style={styles.dateTimeSection}>
-              <Text style={styles.sectionTitle}>Rango Horario</Text>
+              <Text style={styles.sectionTitle}>Programación de Fecha y Hora</Text>
               
               <View style={styles.campo}>
-                <Text style={styles.etiqueta}>Hora de Inicio:</Text>
-                <TouchableOpacity
-                  style={styles.selectorFecha}
-                  onPress={() => setMostrarSelectorInicio(true)}
-                >
-                  <Text style={styles.textoSelector}>{formatearHora(formData.horarioInicio)}</Text>
-                </TouchableOpacity>
+                <Text style={styles.etiqueta}>Fecha y Hora de Inicio:</Text>
+                <View style={styles.selectorContainer}>
+                  <TouchableOpacity
+                    style={[styles.selectorFecha, styles.selectorFechaMitad]}
+                    onPress={() => setMostrarSelectorInicioFecha(true)}
+                  >
+                    <MaterialIcons name="calendar-today" size={18} color={colores.primario} />
+                    <Text style={styles.textoSelector}>
+                      {formData.horarioInicio.toLocaleDateString('es-ES')}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.selectorFecha, styles.selectorFechaMitad]}
+                    onPress={() => setMostrarSelectorInicioHora(true)}
+                  >
+                    <MaterialIcons name="access-time" size={18} color={colores.primario} />
+                    <Text style={styles.textoSelector}>
+                      {formData.horarioInicio.toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit'})}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
 
               <View style={styles.campo}>
-                <Text style={styles.etiqueta}>Hora de Fin:</Text>
-                <TouchableOpacity
-                  style={styles.selectorFecha}
-                  onPress={() => setMostrarSelectorFin(true)}
-                >
-                  <Text style={styles.textoSelector}>{formatearHora(formData.horarioFin)}</Text>
-                </TouchableOpacity>
+                <Text style={styles.etiqueta}>Fecha y Hora de Fin:</Text>
+                <View style={styles.selectorContainer}>
+                  <TouchableOpacity
+                    style={[styles.selectorFecha, styles.selectorFechaMitad]}
+                    onPress={() => setMostrarSelectorFinFecha(true)}
+                  >
+                    <MaterialIcons name="calendar-today" size={18} color={colores.primario} />
+                    <Text style={styles.textoSelector}>
+                      {formData.horarioFin.toLocaleDateString('es-ES')}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.selectorFecha, styles.selectorFechaMitad]}
+                    onPress={() => setMostrarSelectorFinHora(true)}
+                  >
+                    <MaterialIcons name="access-time" size={18} color={colores.primario} />
+                    <Text style={styles.textoSelector}>
+                      {formData.horarioFin.toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit'})}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
 
-            {mostrarSelectorInicio && (
+            {/* Selectores para fecha y hora de inicio */}
+            {mostrarSelectorInicioFecha && (
               <DateTimePicker
                 value={formData.horarioInicio}
-                mode="time"
-                onChange={(event, selectedTime) => {
-                  setMostrarSelectorInicio(false);
-                  if (selectedTime) {
-                    setFormData({ ...formData, horarioInicio: selectedTime });
+                mode="date"
+                onChange={(event, selectedDate) => {
+                  setMostrarSelectorInicioFecha(false);
+                  if (selectedDate && event.type !== 'dismissed') {
+                    const currentTime = formData.horarioInicio;
+                    selectedDate.setHours(currentTime.getHours(), currentTime.getMinutes());
+                    setFormData({ ...formData, horarioInicio: selectedDate });
                   }
                 }}
               />
             )}
 
-            {mostrarSelectorFin && (
+            {mostrarSelectorInicioHora && (
+              <DateTimePicker
+                value={formData.horarioInicio}
+                mode="time"
+                onChange={(event, selectedTime) => {
+                  setMostrarSelectorInicioHora(false);
+                  if (selectedTime && event.type !== 'dismissed') {
+                    const newDate = new Date(formData.horarioInicio);
+                    newDate.setHours(selectedTime.getHours(), selectedTime.getMinutes());
+                    setFormData({ ...formData, horarioInicio: newDate });
+                  }
+                }}
+              />
+            )}
+
+            {/* Selectores para fecha y hora de fin */}
+            {mostrarSelectorFinFecha && (
+              <DateTimePicker
+                value={formData.horarioFin}
+                mode="date"
+                onChange={(event, selectedDate) => {
+                  setMostrarSelectorFinFecha(false);
+                  if (selectedDate && event.type !== 'dismissed') {
+                    const currentTime = formData.horarioFin;
+                    selectedDate.setHours(currentTime.getHours(), currentTime.getMinutes());
+                    setFormData({ ...formData, horarioFin: selectedDate });
+                  }
+                }}
+              />
+            )}
+
+            {mostrarSelectorFinHora && (
               <DateTimePicker
                 value={formData.horarioFin}
                 mode="time"
                 onChange={(event, selectedTime) => {
-                  setMostrarSelectorFin(false);
-                  if (selectedTime) {
-                    setFormData({ ...formData, horarioFin: selectedTime });
+                  setMostrarSelectorFinHora(false);
+                  if (selectedTime && event.type !== 'dismissed') {
+                    const newDate = new Date(formData.horarioFin);
+                    newDate.setHours(selectedTime.getHours(), selectedTime.getMinutes());
+                    setFormData({ ...formData, horarioFin: newDate });
                   }
                 }}
               />
@@ -367,7 +439,7 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: colores.primario,
     padding: 15,
-    paddingVertical: 50,  // Aumentado para dar más espacio vertical
+    paddingVertical: 50,  
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',

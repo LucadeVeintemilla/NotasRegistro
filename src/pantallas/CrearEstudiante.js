@@ -12,6 +12,7 @@ const CrearEstudiante = ({ navigation }) => {
     apellido: '',
     codigo: '',
     curso: '',
+    tutor: '',
     tesis: ''
   });
   const [cargando, setCargando] = useState(false);
@@ -24,7 +25,7 @@ const CrearEstudiante = ({ navigation }) => {
   };
 
   const handleSubmit = async () => {
-    if (!formData.nombre || !formData.apellido || !formData.codigo || !formData.curso || !formData.tesis) {
+    if (!formData.nombre || !formData.apellido || !formData.codigo || !formData.curso || !formData.tutor || !formData.tesis) {
       return Alert.alert('Error', 'Todos los campos son obligatorios');
     }
 
@@ -115,6 +116,16 @@ const CrearEstudiante = ({ navigation }) => {
           </View>
           
           <View style={styles.inputGroup}>
+            <Text style={styles.label}>Tutor Asignado</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Ingrese el nombre del tutor asignado"
+              value={formData.tutor}
+              onChangeText={(value) => handleChange('tutor', value)}
+            />
+          </View>
+          
+          <View style={styles.inputGroup}>
             <Text style={styles.label}>Título de Tesis/Proyecto</Text>
             <TextInput
               style={styles.inputMultiline}
@@ -145,8 +156,7 @@ const CrearEstudiante = ({ navigation }) => {
             style={styles.floatingBackButton}
             onPress={() => navigation.goBack()}
           >
-            <MaterialIcons name="arrow-back" size={28} color="#fff" />
-            <Text style={styles.floatingBackButtonText}>Volver</Text>
+           
           </TouchableOpacity>
         </View>
       </ScrollView>
