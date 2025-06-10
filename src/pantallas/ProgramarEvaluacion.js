@@ -174,6 +174,9 @@ const ProgramarEvaluacion = ({ route, navigation }) => {
                 case 'lector':
                   navigation.navigate('PantallaInicioLector');
                   break;
+                case 'secretario':
+                  navigation.navigate('PantallaInicioSecretario');
+                  break;
                 default:
                   navigation.goBack();
               }
@@ -211,7 +214,7 @@ const ProgramarEvaluacion = ({ route, navigation }) => {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <MaterialIcons name="arrow-back" size={24} color="#fff" />
+          <MaterialIcons name="arrow-back" size={28} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Programar Evaluación</Text>
         <View style={{ width: 24 }} />
@@ -364,6 +367,7 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: colores.primario,
     padding: 15,
+    paddingVertical: 50,  // Aumentado para dar más espacio vertical
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -379,7 +383,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   backButton: {
-    padding: 5,
+    padding: 12,  
+    backgroundColor: 'rgba(255,255,255,0.2)',  
+    borderRadius: 8,  
+    marginRight: 10,  
   },
   content: {
     flex: 1,

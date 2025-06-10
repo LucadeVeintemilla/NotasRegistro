@@ -63,7 +63,7 @@ const CrearEstudiante = ({ navigation }) => {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <MaterialIcons name="arrow-back" size={24} color="#fff" />
+          <MaterialIcons name="arrow-back" size={28} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Crear Estudiante</Text>
         <View style={{ width: 24 }} />
@@ -135,10 +135,18 @@ const CrearEstudiante = ({ navigation }) => {
               <ActivityIndicator color="#fff" />
             ) : (
               <>
-                <MaterialIcons name="save" size={20} color="#fff" />
-                <Text style={styles.submitButtonText}>Guardar y Continuar</Text>
+                <MaterialIcons name="save" size={24} color="#fff" />
+                <Text style={styles.submitButtonText}>Guardar Estudiante</Text>
               </>
             )}
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.floatingBackButton}
+            onPress={() => navigation.goBack()}
+          >
+            <MaterialIcons name="arrow-back" size={28} color="#fff" />
+            <Text style={styles.floatingBackButtonText}>Volver</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -154,10 +162,11 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: colores.primario,
     padding: 15,
+    paddingVertical: 50,  
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    elevation: 4,
+    elevation: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
@@ -169,7 +178,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   backButton: {
-    padding: 5,
+    padding: 12, 
+    backgroundColor: 'rgba(255,255,255,0.2)', 
+    borderRadius: 8, 
+    marginRight: 10, 
   },
   content: {
     flex: 1,

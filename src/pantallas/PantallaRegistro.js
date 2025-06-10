@@ -174,6 +174,7 @@ const PantallaRegistro = ({ navigation }) => {
               <Picker.Item label="Administrador" value="administrador" />
               <Picker.Item label="Director" value="director" />
               <Picker.Item label="Técnico" value="tecnico" />
+              <Picker.Item label="Secretario" value="secretario" />
             </Picker>
           </View>
         </View>

@@ -1,6 +1,7 @@
 import { Picker } from '@react-native-picker/picker';
 import { useState } from 'react';
 import { ActivityIndicator, Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useAuth } from '../contextos/AuthContext';
 import { colores } from '../estilos/estilosGlobales';
 import { registrarPorTecnico } from '../servicios/auth/authService';
@@ -95,6 +96,7 @@ const PantallaRegistroUsuarios = ({ navigation }) => {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
+          <MaterialIcons name="arrow-back" size={28} color="#fff" />
           <Text style={styles.backButtonText}>Volver</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Registro de Usuarios</Text>
@@ -217,17 +219,23 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: colores.primario,
     padding: 15,
+    paddingVertical: 55,
     flexDirection: 'row',
     alignItems: 'center',
   },
   backButton: {
-    padding: 5,
-    marginRight: 10,
+    padding: 12,
+    marginRight: 15,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   backButtonText: {
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
+    marginLeft: 5,
   },
   headerTitle: {
     color: '#fff',
