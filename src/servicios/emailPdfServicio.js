@@ -42,14 +42,16 @@ export const generarHTML = (evaluacion) => {
           padding: 20px;
           box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-        .header {
+        h1 {
           text-align: center;
-          margin-bottom: 15px;
-        }
-        h2 {
-          text-align: center;
-          margin-bottom: 20px;
           font-size: 16px;
+          text-transform: uppercase;
+          margin-bottom: 20px;
+        }
+        .label {
+          font-weight: bold;
+          width: 30%;
+          background-color: #f0f0f0;
         }
         table {
           width: 100%;
@@ -87,12 +89,34 @@ export const generarHTML = (evaluacion) => {
     </head>
     <body>
       <div class="container">
-        <div class="header">
-          <h2>CRITERIOS DE EVALUACIÓN</h2>
-          <p><strong>Estudiante:</strong> ${evaluacion.estudiante.nombre} ${evaluacion.estudiante.apellido}</p>
-          <p><strong>Fecha:</strong> ${new Date(evaluacion.fecha).toLocaleDateString()}</p>
-          <p><strong>Título:</strong> ${evaluacion.titulo || ''}</p>
-        </div>
+        <h1>RÚBRICA DE EVALUACIÓN<br>DE LA DISERTACIÓN ORAL DEL TRABAJO DE TITULACIÓN</h1>
+
+        <table style="margin-top: 20px;">
+          <tr>
+            <td class="label" style="font-weight: bold; width: 30%; background-color: #f0f0f0;">Estudiante:</td>
+            <td>${evaluacion.estudiante.nombre} ${evaluacion.estudiante.apellido}</td>
+          </tr>
+          <tr>
+            <td class="label" style="font-weight: bold; width: 30%; background-color: #f0f0f0;">Tutor:</td>
+            <td>${evaluacion.estudiante.tutor || ''}</td>
+          </tr>
+          <tr>
+            <td class="label" style="font-weight: bold; width: 30%; background-color: #f0f0f0;">Nombre del Miembro del Tribunal:</td>
+            <td>${evaluacion.evaluador.nombre + ' ' + evaluacion.evaluador.apellido || ''}</td>
+          </tr>
+          <tr>
+            <td class="label" style="font-weight: bold; width: 30%; background-color: #f0f0f0;">Programa:</td>
+            <td>${evaluacion.estudiante.curso || ''}</td>
+          </tr>
+          <tr>
+            <td class="label" style="font-weight: bold; width: 30%; background-color: #f0f0f0;">Tema del Trabajo de Titulación:</td>
+            <td>${evaluacion.estudiante.tesis || ''}</td>
+          </tr>
+          <tr>
+            <td class="label" style="font-weight: bold; width: 30%; background-color: #f0f0f0;">Fecha:</td>
+            <td>${new Date(evaluacion.fecha).toLocaleDateString()}</td>
+          </tr>
+        </table>
 
         <table>
           <thead>

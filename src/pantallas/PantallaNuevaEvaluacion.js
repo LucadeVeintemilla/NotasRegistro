@@ -35,6 +35,7 @@ const PantallaNuevaEvaluacion = ({ route, navigation }) => {
     apellido: '',
     codigo: '',
     curso: '',
+    tutor: '',
   });
   const [titulo, setTitulo] = useState('');
   const [valoresSeleccionados, setValoresSeleccionados] = useState({});
@@ -95,6 +96,10 @@ const PantallaNuevaEvaluacion = ({ route, navigation }) => {
       Alert.alert('Error', 'El código del estudiante es obligatorio');
       return false;
     }
+    if (!datosEstudiante.tutor.trim()) {
+      Alert.alert('Error', 'El tutor asignado es obligatorio');
+      return false;
+    }
     if (!titulo.trim()) {
       Alert.alert('Error', 'El título de la evaluación es obligatorio');
       return false;
@@ -137,6 +142,7 @@ const PantallaNuevaEvaluacion = ({ route, navigation }) => {
           apellido: datosEstudiante.apellido,
           codigo: datosEstudiante.codigo,
           curso: datosEstudiante.curso,
+          tutor: datosEstudiante.tutor,
           tesis: titulo
         }
       );
@@ -307,6 +313,21 @@ const PantallaNuevaEvaluacion = ({ route, navigation }) => {
             ) : (
               <View style={styles.campoNoEditable}>
                 <Text style={styles.textoNoEditable}>{datosEstudiante.curso}</Text>
+              </View>
+            )}
+          </View>
+          <View style={styles.campo}>
+            <Text style={styles.etiqueta}>Tutor Asignado:</Text>
+            {esEditable ? (
+              <TextInput
+                style={estilosGlobales.input}
+                value={datosEstudiante.tutor}
+                onChangeText={(texto) => setDatosEstudiante({ ...datosEstudiante, tutor: texto })}
+                placeholder="Nombre del tutor asignado"
+              />
+            ) : (
+              <View style={styles.campoNoEditable}>
+                <Text style={styles.textoNoEditable}>{datosEstudiante.tutor}</Text>
               </View>
             )}
           </View>

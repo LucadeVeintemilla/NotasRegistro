@@ -261,6 +261,17 @@ const ProgramarEvaluacion = ({ route, navigation }) => {
             </View>
             
             <View style={styles.inputGroup}>
+              <Text style={styles.label}>Tutor Asignado</Text>
+              <View style={styles.tutorContainer}>
+                <Text style={styles.tutorText}>
+                  {formData.estudiante ? 
+                    (estudiantes.find(e => e._id === formData.estudiante)?.tutor || 'No tiene tutor asignado') : 
+                    'Seleccione un estudiante primero'}
+                </Text>
+              </View>
+            </View>
+            
+            <View style={styles.inputGroup}>
               <Text style={styles.label}>Evaluador (Lector)</Text>
               <View style={styles.pickerContainer}>
                 <Picker
@@ -510,6 +521,17 @@ const styles = StyleSheet.create({
     borderColor: '#ddd',
     borderRadius: 5,
     backgroundColor: '#f9f9f9',
+  },
+  tutorContainer: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 5,
+    backgroundColor: '#f9f9f9',
+    padding: 12,
+  },
+  tutorText: {
+    fontSize: 16,
+    color: colores.texto,
   },
   picker: {
     height: 50,
