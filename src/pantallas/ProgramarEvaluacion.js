@@ -64,10 +64,19 @@ const ProgramarEvaluacion = ({ route, navigation }) => {
   };
 
   const handleChange = (name, value) => {
-    setFormData({
-      ...formData,
-      [name]: value
-    });
+    if (name === 'estudiante' && value) {
+      const estudianteSeleccionado = estudiantes.find(e => e._id === value);
+      if (estudianteSeleccionado) {
+        setFormData(prev => ({
+          ...prev,
+          [name]: value,
+          tutor: estudianteSeleccionado.tutor || '',
+          titulo: estudianteSeleccionado.tesis || prev.titulo
+        }));
+        return;
+      }
+    }
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const ajustarFecha = (campo, unidad, cantidad) => {
