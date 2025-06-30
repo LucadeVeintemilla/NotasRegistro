@@ -14,7 +14,6 @@ const PantallaRegistroUsuarios = ({ navigation }) => {
     correo: '',
     telefono: '',
     contraseña: '',
-    confirmarContraseña: '',
     tipo: 'lector'
   });
   const [cargando, setCargando] = useState(false);
@@ -29,17 +28,14 @@ const PantallaRegistroUsuarios = ({ navigation }) => {
 
   const handleRegistro = async () => {
     if (!formData.nombre || !formData.apellido || !formData.cedula || !formData.correo || 
-        !formData.telefono || !formData.contraseña || !formData.confirmarContraseña) {
+        !formData.telefono) {
       return Alert.alert('Error', 'Todos los campos son obligatorios');
     }
-
-    if (formData.contraseña !== formData.confirmarContraseña) {
-      return Alert.alert('Error', 'Las contraseñas no coinciden');
-    }
-
-    if (formData.contraseña.length < 6) {
-      return Alert.alert('Error', 'La contraseña debe tener al menos 6 caracteres');
-    }
+    
+    const datosEnvio = {
+      ...formData,
+      contraseña: formData.cedula
+    };
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.correo)) {
@@ -53,9 +49,7 @@ const PantallaRegistroUsuarios = ({ navigation }) => {
     try {
       setCargando(true);
       
-      const { confirmarContraseña, ...datosRegistro } = formData;
-      
-      const data = await registrarPorTecnico(datosRegistro);
+      const data = await registrarPorTecnico(datosEnvio);
       
       Alert.alert(
         'Registro exitoso',
@@ -71,7 +65,6 @@ const PantallaRegistroUsuarios = ({ navigation }) => {
                 correo: '',
                 telefono: '',
                 contraseña: '',
-                confirmarContraseña: '',
                 tipo: 'lector'
               });
             }
@@ -160,25 +153,9 @@ const PantallaRegistroUsuarios = ({ navigation }) => {
         </View>
         
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Contraseña</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Ingrese la contraseña"
-            secureTextEntry
-            value={formData.contraseña}
-            onChangeText={(value) => handleChange('contraseña', value)}
-          />
-        </View>
-        
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Confirmar Contraseña</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Confirme la contraseña"
-            secureTextEntry
-            value={formData.confirmarContraseña}
-            onChangeText={(value) => handleChange('confirmarContraseña', value)}
-          />
+          <Text style={styles.nota}>
+            <Text style={{fontWeight: 'bold'}}>Nota:</Text> La contraseña se establecerá automáticamente como el número de cédula del usuario.
+          </Text>
         </View>
         
         <View style={styles.inputGroup}>
@@ -299,6 +276,17 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  nota: {
+    color: '#666',
+    fontSize: 14,
+    marginTop: 5,
+    fontStyle: 'italic',
+    backgroundColor: '#f8f9fa',
+    padding: 10,
+    borderRadius: 5,
+    borderLeftWidth: 3,
+    borderLeftColor: colores.primario
   },
 });
 
