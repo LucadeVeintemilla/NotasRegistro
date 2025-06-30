@@ -1,7 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import axios from 'axios';
 import { useEffect, useState, useCallback } from 'react';
-import { Alert, FlatList, Platform, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, Modal, Platform, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../contextos/AuthContext';
 import { colores } from '../estilos/estilosGlobales';
@@ -12,6 +12,7 @@ const PantallaInicioLector = ({ navigation }) => {
   const [usuario, setUsuario] = useState(null);
   const [evaluacionesPendientes, setEvaluacionesPendientes] = useState([]);
   const [cargando, setCargando] = useState(true);
+  const [menuVisible, setMenuVisible] = useState(false);
   const auth = useAuth(); 
 
   const cargarEvaluacionesPendientes = useCallback(async () => {
@@ -49,6 +50,15 @@ const PantallaInicioLector = ({ navigation }) => {
   const cargarUsuario = async () => {
     const userData = await getCurrentUser();
     setUsuario(userData);
+  };
+
+  const toggleMenu = () => {
+    setMenuVisible(!menuVisible);
+  };
+
+  const handleCambiarContraseña = () => {
+    setMenuVisible(false);
+    navigation.navigate('CambiarContrasena');
   };
 
   const handleLogout = async () => {
@@ -144,10 +154,54 @@ const PantallaInicioLector = ({ navigation }) => {
     <SafeAreaView style={styles.container} edges={['right', 'left', 'bottom']}>
       <StatusBar backgroundColor={colores.primario} barStyle="light-content" />
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Panel de Lector</Text>
-        <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-          <MaterialIcons name="exit-to-app" size={24} color={colores.textoClaro} />
-        </TouchableOpacity>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.headerTitle}>Bienvenido, {usuario?.nombre || 'Lector'}</Text>
+        </View>
+        <View style={styles.headerIcons}>
+          <TouchableOpacity 
+            style={[styles.iconButton, { marginRight: 15 }]}
+            onPress={toggleMenu}
+          >
+            <MaterialIcons name="account-circle" size={28} color="#fff" />
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.iconButton}
+            onPress={() => navigation.navigate('PantallaAyuda')}
+          >
+            <MaterialIcons name="help-outline" size={24} color="#fff" />
+          </TouchableOpacity>
+        </View>
+        
+        <Modal
+          transparent={true}
+          visible={menuVisible}
+          animationType="fade"
+          onRequestClose={() => setMenuVisible(false)}
+        >
+          <TouchableOpacity 
+            style={styles.modalOverlay}
+            activeOpacity={1}
+            onPress={() => setMenuVisible(false)}
+          >
+            <View style={styles.menuContainer}>
+              <TouchableOpacity 
+                style={styles.menuItem}
+                onPress={handleCambiarContraseña}
+              >
+                <MaterialIcons name="lock" size={20} color={colores.primario} style={styles.menuIcon} />
+                <Text style={styles.menuText}>Cambiar Contraseña</Text>
+              </TouchableOpacity>
+              <View style={styles.divider} />
+              <TouchableOpacity 
+                style={styles.menuItem}
+                onPress={handleLogout}
+              >
+                <MaterialIcons name="exit-to-app" size={20} color="#e74c3c" style={styles.menuIcon} />
+                <Text style={[styles.menuText, { color: '#e74c3c' }]}>Cerrar Sesión</Text>
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        </Modal>
       </View>
 
       <ScrollView style={styles.content}>
@@ -202,15 +256,54 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: colores.primario,
     padding: 15,
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight + 10 : 15,
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    elevation: 4,
+  },
+  headerIcons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  iconButton: {
+    padding: 5,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-start',
+    paddingTop: 60,
+    paddingRight: 20,
+    alignItems: 'flex-end',
+  },
+  menuContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    width: 220,
+    paddingVertical: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+  },
+  menuIcon: {
+    marginRight: 12,
+    width: 24,
+    textAlign: 'center',
+  },
+  menuText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#eee',
+    marginVertical: 4,
   },
   headerTitle: {
     color: '#fff',

@@ -74,11 +74,14 @@ export const setAuthToken = async () => {
     
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      return token;
     } else {
       delete axios.defaults.headers.common['Authorization'];
+      throw new Error('No hay token de autenticación');
     }
   } catch (error) {
     console.error('Error al configurar token:', error);
+    throw error;
   }
 };
 
@@ -99,10 +102,35 @@ export const getUserRole = async () => {
 export const registrarPorTecnico = async (userData) => {
   try {
     await setAuthToken();
-    
-    const response = await axios.post(getApiUrl(`${AUTH_BASE_PATH}/registro-tecnico`), userData);
+    const response = await axios.post(getApiUrl(`${AUTH_BASE_PATH}/registrar-por-tecnico`), userData);
     return response.data;
   } catch (error) {
     throw error.response ? error.response.data : new Error('Error en el servidor');
+  }
+};
+
+/**
+ * Cambia la contraseña del usuario actual
+ * @param {string} contraseñaActual - La contraseña actual del usuario
+ * @param {string} nuevaContraseña - La nueva contraseña
+ * @returns {Promise<Object>} Respuesta del servidor
+ */
+export const cambiarContraseña = async (contraseñaActual, nuevaContraseña) => {
+  try {
+    const token = await setAuthToken();
+    const response = await axios.put(
+      getApiUrl(`${AUTH_BASE_PATH}/cambiar-password`), 
+      { contraseñaActual, nuevaContraseña },
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error en cambiarContraseña:', error.response?.data || error.message);
+    throw error.response ? error.response.data : new Error('Error al cambiar la contraseña');
   }
 };

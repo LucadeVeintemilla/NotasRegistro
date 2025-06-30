@@ -21,6 +21,7 @@ import PantallaNuevaEvaluacion from '../pantallas/PantallaNuevaEvaluacion';
 import PantallaRegistro from '../pantallas/PantallaRegistro';
 import PantallaRegistroUsuarios from '../pantallas/PantallaRegistroUsuarios';
 import ProgramarEvaluacion from '../pantallas/ProgramarEvaluacion';
+import CambiarContrasena from '../pantallas/CambiarContrasena';
 
 import { colores } from '../estilos/estilosGlobales';
 import { getUserRole, isAuthenticated, setAuthToken } from '../servicios/auth/authService';
@@ -56,6 +57,7 @@ const LectorStack = () => (
     <Stack.Screen name="PantallaDetalleEvaluacion" component={PantallaDetalleEvaluacion} />
     <Stack.Screen name="PantallaEstadisticas" component={PantallaEstadisticas} />
     <Stack.Screen name="PantallaAyuda" component={PantallaAyuda} />
+    <Stack.Screen name="CambiarContrasena" component={CambiarContrasena} />
   </Stack.Navigator>
 );
 
@@ -69,6 +71,7 @@ const DirectorStack = () => (
     <Stack.Screen name="PantallaDetalleEvaluacion" component={PantallaDetalleEvaluacion} />
     <Stack.Screen name="PantallaEstadisticas" component={PantallaEstadisticas} />
     <Stack.Screen name="PantallaAyuda" component={PantallaAyuda} />
+    <Stack.Screen name="CambiarContrasena" component={CambiarContrasena} />
   </Stack.Navigator>
 );
 
