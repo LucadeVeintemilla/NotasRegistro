@@ -58,6 +58,32 @@ const PantallaInicioAdmin = ({ navigation }) => {
         </View>
 
         <View style={styles.cardSection}>
+          <View style={styles.cardSection}>
+                    <Text style={styles.sectionTitle}>Gestión de Usuarios</Text>
+                    
+                    <TouchableOpacity
+                      style={[styles.card, { backgroundColor: colores.primario }]}
+                      onPress={() => navigation.navigate('PantallaRegistroUsuariosAdmin')}
+                    >
+                      <MaterialIcons name="person-add" size={28} color="#fff" />
+                      <View style={styles.cardContent}>
+                        <Text style={styles.cardTitle}>Registrar Usuario</Text>
+                        <Text style={styles.cardDescription}>Añadir nuevo usuario con rol Lector o Director</Text>
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+          <Text style={styles.sectionTitle}>Gestión de Usuarios</Text>
+          <TouchableOpacity
+            style={[styles.card, { backgroundColor: colores.primario }]}
+            onPress={() => navigation.navigate('PantallaGestionUsuarios')}
+          >
+            <MaterialIcons name="supervisor-account" size={28} color="#fff" />
+            <View style={styles.cardContent}>
+              <Text style={styles.cardTitle}>Usuarios</Text>
+              <Text style={styles.cardDescription}>Ver, editar o eliminar usuarios</Text>
+            </View>
+          </TouchableOpacity>
+
           <Text style={styles.sectionTitle}>Gestión de Evaluaciones</Text>
           
           <TouchableOpacity
@@ -77,8 +103,8 @@ const PantallaInicioAdmin = ({ navigation }) => {
           >
             <MaterialIcons name="schedule" size={28} color="#fff" />
             <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>Programar Evaluación</Text>
-              <Text style={styles.cardDescription}>Definir rango horario para evaluaciones</Text>
+              <Text style={styles.cardTitle}>Programar Disertación</Text>
+              <Text style={styles.cardDescription}>Definir rango horario para disertaciones</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -87,7 +113,7 @@ const PantallaInicioAdmin = ({ navigation }) => {
           <Text style={styles.sectionTitle}>Información</Text>
           
           <View style={styles.infoCard}>
-            <Text style={styles.infoTitle}>Rúbrica de Evaluación</Text>
+            <Text style={styles.infoTitle}>Rúbrica de Disertación</Text>
             <Text style={styles.infoContent}>
               El sistema utiliza una rúbrica estandarizada con los siguientes criterios principales:
             </Text>

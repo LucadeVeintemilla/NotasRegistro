@@ -115,8 +115,9 @@ const PantallaInicioLector = ({ navigation }) => {
         evaluacionCompleta: item,
         estudianteNombre: item.estudiante?.nombre || '',
         estudianteApellido: item.estudiante?.apellido || '',
-        estudianteCodigo: item.estudiante?.codigo || '',
-        estudianteCurso: item.estudiante?.curso || '',
+        estudianteCedula: item.estudiante?.cedula || '',
+        estudianteTipo: item.estudiante?.tipo || 'actual',
+        estudianteMaestria: item.estudiante?.maestria || '',
         titulo: item.titulo || ''
       });
     };
@@ -255,9 +256,10 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: colores.primario,
-    padding: 15,
+    padding: 40,
     flexDirection: 'row',
     alignItems: 'center',
+    marginTop: 10,
   },
   headerIcons: {
     flexDirection: 'row',
@@ -284,12 +286,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
+    
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: 1,
     paddingHorizontal: 20,
+    marginTop: 10,
   },
   menuIcon: {
     marginRight: 12,
@@ -297,6 +301,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   menuText: {
+    marginTop: -16,
     fontSize: 16,
     color: '#333',
   },

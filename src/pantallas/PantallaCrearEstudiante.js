@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { useState } from 'react';
+import { Picker } from '@react-native-picker/picker';
 import {
     ActivityIndicator,
     Alert,
@@ -19,8 +20,9 @@ const PantallaCrearEstudiante = ({ navigation }) => {
   const [formData, setFormData] = useState({
     nombre: '',
     apellido: '',
-    codigo: '',
-    curso: '',
+    cedula: '',
+    tipo: 'antigua',
+    maestria: '',
     tesis: ''
   });
   const [cargando, setCargando] = useState(false);
@@ -33,7 +35,7 @@ const PantallaCrearEstudiante = ({ navigation }) => {
   };
 
   const handleSubmit = async () => {
-    if (!formData.nombre || !formData.apellido || !formData.codigo || !formData.curso || !formData.tesis) {
+    if (!formData.nombre || !formData.apellido || !formData.cedula || !formData.maestria || !formData.tesis) {
       return Alert.alert('Error', 'Todos los campos son obligatorios');
     }
 
@@ -43,7 +45,14 @@ const PantallaCrearEstudiante = ({ navigation }) => {
       
       const response = await axios.post(
         getApiUrl('/api/estudiantes'),
-        formData
+        {
+          nombre: formData.nombre,
+          apellido: formData.apellido,
+          cedula: formData.cedula,
+          maestria: formData.maestria,
+          tesis: formData.tesis,
+          tipo: formData.tipo
+        }
       );
       
       Alert.alert(
@@ -81,7 +90,7 @@ const PantallaCrearEstudiante = ({ navigation }) => {
       <ScrollView style={styles.content}>
         <View style={styles.formContainer}>
           <Text style={styles.formTitle}>Información del Estudiante</Text>
-          <Text style={styles.formDescription}>Complete los datos del estudiante para crear una nueva evaluación</Text>
+          <Text style={styles.formDescription}>Complete los datos del estudiante para crear una nueva disertación</Text>
           
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Nombre</Text>
@@ -104,22 +113,22 @@ const PantallaCrearEstudiante = ({ navigation }) => {
           </View>
           
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Código</Text>
+            <Text style={styles.label}>Cédula</Text>
             <TextInput
               style={styles.input}
-              placeholder="Ingrese el código o ID del estudiante"
-              value={formData.codigo}
-              onChangeText={(value) => handleChange('codigo', value)}
+              placeholder="Ingrese la cédula del estudiante"
+              value={formData.cedula}
+              onChangeText={(value) => handleChange('cedula', value)}
             />
           </View>
           
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Curso</Text>
+            <Text style={styles.label}>Maestría</Text>
             <TextInput
               style={styles.input}
-              placeholder="Ingrese el curso del estudiante"
-              value={formData.curso}
-              onChangeText={(value) => handleChange('curso', value)}
+              placeholder="Ingrese la maestría del estudiante"
+              value={formData.maestria}
+              onChangeText={(value) => handleChange('maestria', value)}
             />
           </View>
           
@@ -156,6 +165,13 @@ const PantallaCrearEstudiante = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    overflow: 'hidden',
+    marginTop: 4
+  },
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',

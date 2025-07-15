@@ -233,7 +233,7 @@ const ProgramarEvaluacion = ({ route, navigation }) => {
         >
           <MaterialIcons name="arrow-back" size={28} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Programar Evaluación</Text>
+        <Text style={styles.headerTitle}>Programar Disertación</Text>
         <View style={{ width: 24 }} />
       </View>
 
@@ -245,7 +245,7 @@ const ProgramarEvaluacion = ({ route, navigation }) => {
       ) : (
         <ScrollView style={styles.content}>
           <View style={styles.formContainer}>
-            <Text style={styles.formTitle}>Detalles de la Evaluación</Text>
+            <Text style={styles.formTitle}>Detalles de la Disertación</Text>
             <Text style={styles.formDescription}>Configure el horario y asigne un evaluador</Text>
             
             <View style={styles.inputGroup}>
@@ -261,7 +261,7 @@ const ProgramarEvaluacion = ({ route, navigation }) => {
                   {estudiantes.map(estudiante => (
                     <Picker.Item 
                       key={estudiante._id} 
-                      label={`${estudiante.nombre} ${estudiante.apellido} (${estudiante.codigo})`} 
+                      label={`${estudiante.nombre} ${estudiante.apellido} (${estudiante.cedula})`} 
                       value={estudiante._id} 
                     />
                   ))}
@@ -301,7 +301,7 @@ const ProgramarEvaluacion = ({ route, navigation }) => {
             </View>
             
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Título de la Evaluación</Text>
+              <Text style={styles.label}>Título de la Disertación</Text>
               <TouchableOpacity 
                 style={styles.input}
                 onPress={() => {
@@ -314,7 +314,7 @@ const ProgramarEvaluacion = ({ route, navigation }) => {
                 }}
               >
                 <Text style={formData.titulo ? styles.inputText : styles.inputPlaceholder}>
-                  {formData.titulo || 'Título de la evaluación (click para usar título de tesis)'}
+                  {formData.titulo || 'Título de la disertación (click para usar título de tesis)'}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -379,14 +379,20 @@ const ProgramarEvaluacion = ({ route, navigation }) => {
                 onChange={(event, selectedDate) => {
                   setMostrarSelectorInicioFecha(false);
                   if (selectedDate && event.type !== 'dismissed') {
+                    const now = new Date();
                     const currentTime = formData.horarioInicio;
                     selectedDate.setHours(currentTime.getHours(), currentTime.getMinutes());
+                    if (selectedDate < now) {
+                      Alert.alert('Fecha inválida', 'La fecha y hora de inicio no pueden ser anteriores a la actual');
+                      return;
+                    }
                     setFormData({ ...formData, horarioInicio: selectedDate });
                   }
                 }}
               />
             )}
 
+            {/* Selector para hora de inicio */}
             {mostrarSelectorInicioHora && (
               <DateTimePicker
                 value={formData.horarioInicio}
@@ -394,8 +400,13 @@ const ProgramarEvaluacion = ({ route, navigation }) => {
                 onChange={(event, selectedTime) => {
                   setMostrarSelectorInicioHora(false);
                   if (selectedTime && event.type !== 'dismissed') {
+                    const now = new Date();
                     const newDate = new Date(formData.horarioInicio);
                     newDate.setHours(selectedTime.getHours(), selectedTime.getMinutes());
+                    if (newDate < now) {
+                      Alert.alert('Hora inválida', 'La fecha y hora de inicio no pueden ser anteriores a la actual');
+                      return;
+                    }
                     setFormData({ ...formData, horarioInicio: newDate });
                   }
                 }}
@@ -410,8 +421,14 @@ const ProgramarEvaluacion = ({ route, navigation }) => {
                 onChange={(event, selectedDate) => {
                   setMostrarSelectorFinFecha(false);
                   if (selectedDate && event.type !== 'dismissed') {
+                    const twoWeeksAhead = new Date();
+                    twoWeeksAhead.setDate(twoWeeksAhead.getDate() + 14);
                     const currentTime = formData.horarioFin;
                     selectedDate.setHours(currentTime.getHours(), currentTime.getMinutes());
+                    if (selectedDate > twoWeeksAhead) {
+                      Alert.alert('Fecha inválida', 'La fecha de fin no puede superar dos semanas desde hoy');
+                      return;
+                    }
                     setFormData({ ...formData, horarioFin: selectedDate });
                   }
                 }}
@@ -425,23 +442,31 @@ const ProgramarEvaluacion = ({ route, navigation }) => {
                 onChange={(event, selectedTime) => {
                   setMostrarSelectorFinHora(false);
                   if (selectedTime && event.type !== 'dismissed') {
+                    const twoWeeksAhead = new Date();
+                    twoWeeksAhead.setDate(twoWeeksAhead.getDate() + 14);
                     const newDate = new Date(formData.horarioFin);
                     newDate.setHours(selectedTime.getHours(), selectedTime.getMinutes());
+                    if (newDate > twoWeeksAhead) {
+                      Alert.alert('Hora inválida', 'La fecha y hora de fin no pueden superar dos semanas desde hoy');
+                      return;
+                    }
                     setFormData({ ...formData, horarioFin: newDate });
                   }
                 }}
               />
             )}
 
+            {/* Botón para guardar */}
             <TouchableOpacity
               style={[styles.botonGuardar, cargando && styles.botonDeshabilitado]}
               onPress={handleSubmit}
               disabled={cargando}
             >
+          
               {cargando ? (
                 <ActivityIndicator size="small" color={colores.textoClaro} />
               ) : (
-                <Text style={styles.textoBotonGuardar}>Programar Evaluación</Text>
+                <Text style={styles.textoBotonGuardar}>Programar Disertación</Text>
               )}
             </TouchableOpacity>
           </View>

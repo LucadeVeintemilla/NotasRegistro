@@ -71,7 +71,7 @@ const PantallaCrearEstudiante = ({ navigation }) => {
       <ScrollView style={styles.content}>
         <View style={styles.formContainer}>
           <Text style={styles.formTitle}>Información del Estudiante</Text>
-          <Text style={styles.formDescription}>Complete los datos del estudiante para crear una nueva evaluación</Text>
+          <Text style={styles.formDescription}>Complete los datos del estudiante para crear una nueva disertación</Text>
           
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Nombre</Text>

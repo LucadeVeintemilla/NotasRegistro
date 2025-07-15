@@ -99,10 +99,41 @@ export const getUserRole = async () => {
   }
 };
 
+export const getUsuarios = async (tipo = '') => {
+  try {
+    await setAuthToken();
+    const url = tipo ? getApiUrl(`${AUTH_BASE_PATH}/usuarios?tipo=${tipo}`) : getApiUrl(`${AUTH_BASE_PATH}/usuarios`);
+    const response = await axios.get(url);
+    return response.data.data;
+  } catch (error) {
+    throw error.response ? error.response.data : new Error('Error en el servidor');
+  }
+};
+
+export const actualizarUsuario = async (id, datos) => {
+  try {
+    await setAuthToken();
+    const response = await axios.put(getApiUrl(`${AUTH_BASE_PATH}/usuarios/${id}`), datos);
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : new Error('Error en el servidor');
+  }
+};
+
+export const eliminarUsuario = async (id) => {
+  try {
+    await setAuthToken();
+    const response = await axios.delete(getApiUrl(`${AUTH_BASE_PATH}/usuarios/${id}`));
+    return response.data;
+  } catch (error) {
+    throw error.response ? error.response.data : new Error('Error en el servidor');
+  }
+};
+
 export const registrarPorTecnico = async (userData) => {
   try {
     await setAuthToken();
-    const response = await axios.post(getApiUrl(`${AUTH_BASE_PATH}/registrar-por-tecnico`), userData);
+    const response = await axios.post(getApiUrl(`${AUTH_BASE_PATH}/registro-tecnico`), userData);
     return response.data;
   } catch (error) {
     throw error.response ? error.response.data : new Error('Error en el servidor');

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, ActivityIndicator, Platform } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { Picker } from '@react-native-picker/picker';
 import { colores } from '../estilos/estilosGlobales';
 import axios from 'axios';
 import { setAuthToken } from '../servicios/auth/authService';
@@ -9,6 +10,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
 import * as XLSX from 'xlsx';
+import validarCedula from '../utils/validarCedula';
 
 const CrearEstudiante = ({ navigation, route }) => {
   const [userRole, setUserRole] = useState('');
@@ -29,12 +31,16 @@ const CrearEstudiante = ({ navigation, route }) => {
     
     getUserRole();
   }, []);
+  const [errorCedula, setErrorCedula] = useState('');
+
   const [formData, setFormData] = useState({
     nombre: '',
     apellido: '',
-    codigo: '',
-    curso: '',
+    cedula: '',
+    tipo: 'antigua',
+    maestria: '',
     tutor: '',
+    
     tesis: ''
   });
   const [cargando, setCargando] = useState(false);
@@ -43,6 +49,14 @@ const CrearEstudiante = ({ navigation, route }) => {
   const [totalEstudiantesImportados, setTotalEstudiantesImportados] = useState(0);
 
   const handleChange = (name, value) => {
+    if (name === 'cedula') {
+      if (value.length === 10) {
+        setErrorCedula(validarCedula(value) ? '' : 'Cédula inválida');
+      } else {
+        setErrorCedula('');
+      }
+    }
+
     setFormData({
       ...formData,
       [name]: value
@@ -50,8 +64,12 @@ const CrearEstudiante = ({ navigation, route }) => {
   };
 
   const handleSubmit = async () => {
-    if (!formData.nombre || !formData.apellido || !formData.codigo || !formData.curso || !formData.tutor || !formData.tesis) {
+    if (!formData.nombre || !formData.apellido || !formData.cedula || !formData.maestria || !formData.tutor || !formData.tesis) {
       return Alert.alert('Error', 'Todos los campos son obligatorios');
+    }
+
+    if (errorCedula) {
+      return Alert.alert('Error', errorCedula);
     }
 
     try {
@@ -60,7 +78,15 @@ const CrearEstudiante = ({ navigation, route }) => {
       
       const response = await axios.post(
         getApiUrl('/api/estudiantes'),
-        formData
+        {
+          nombre: formData.nombre,
+          apellido: formData.apellido,
+          cedula: formData.cedula,
+          maestria: formData.maestria,
+          tutor: formData.tutor,
+          tesis: formData.tesis,
+          tipo: formData.tipo
+        }
       );
       
       Alert.alert(
@@ -132,10 +158,10 @@ const CrearEstudiante = ({ navigation, route }) => {
         console.log('Error con FileReader, intentando con ruta directa', err);
         
         estudiantes = [
-          { nombre: 'Ana', apellido: 'Pérez', codigo: '1001', curso: 'Matemáticas', tutor: 'Dr. Juan Gómez', tesis: 'Aplicación de algoritmos en educación' },
-          { nombre: 'Luis', apellido: 'Martínez', codigo: '1002', curso: 'Física', tutor: 'Dra. María López', tesis: 'Energía renovable y su impacto' },
-          { nombre: 'Carla', apellido: 'Rodríguez', codigo: '1003', curso: 'Química', tutor: 'Dr. Pedro Ruiz', tesis: 'Síntesis de compuestos orgánicos' },
-          { nombre: 'Jorge', apellido: 'Gómez', codigo: '1004', curso: 'Biología', tutor: 'Dra. Elena Torres', tesis: 'Estudio de biodiversidad en la Amazonía' },
+          { nombre: 'Ana', apellido: 'Pérez', cedula: '1001', tipo: 'antigua', maestria: 'Matemáticas', tutor: 'Dr. Juan Gómez', tesis: 'Aplicación de algoritmos en educación' },
+          { nombre: 'Luis', apellido: 'Martínez', cedula: '1002', tipo: 'actual', maestria: 'Física', tutor: 'Dra. María López', tesis: 'Energía renovable y su impacto' },
+          { nombre: 'Carla', apellido: 'Rodríguez', cedula: '1003', tipo: 'antigua', maestria: 'Química', tutor: 'Dr. Pedro Ruiz', tesis: 'Síntesis de compuestos orgánicos' },
+          { nombre: 'Jorge', apellido: 'Gómez', cedula: '1004', tipo: 'actual', maestria: 'Biología', tutor: 'Dra. Elena Torres', tesis: 'Estudio de biodiversidad en la Amazonía' },
         ];
         
         Alert.alert(
@@ -153,7 +179,7 @@ const CrearEstudiante = ({ navigation, route }) => {
       
       for (let i = 0; i < estudiantes.length; i++) {
         const estudiante = estudiantes[i];
-        const camposRequeridos = ['nombre', 'apellido', 'codigo', 'curso', 'tutor', 'tesis'];
+        const camposRequeridos = ['nombre', 'apellido', 'cedula', 'maestria', 'tutor', 'tesis', 'tipo'];
         
         const camposFaltantes = camposRequeridos.filter(campo => !estudiante[campo]);
         
@@ -176,13 +202,13 @@ const CrearEstudiante = ({ navigation, route }) => {
     }
   };
   
-  const verificarEstudianteExistente = async (codigo) => {
+  const verificarEstudianteExistente = async (cedula) => {
     try {
       await setAuthToken();
-      const response = await axios.get(getApiUrl(`/api/estudiantes/verificar/${codigo}`));
+      const response = await axios.get(getApiUrl(`/api/estudiantes/verificar/${cedula}`));
       return response.data.exists;
     } catch (error) {
-      console.log(`No se pudo verificar si el estudiante con código ${codigo} existe:`, error.message);
+      console.log(`No se pudo verificar si el estudiante con cedula ${cedula} existe:`, error.message);
       return false;
     }
   };
@@ -203,9 +229,9 @@ const CrearEstudiante = ({ navigation, route }) => {
           console.log(`Importando estudiante ${i+1}:`, JSON.stringify(estudiante));
           
           try {
-            const response = await axios.get(getApiUrl(`/api/estudiantes/buscar?codigo=${estudiante.codigo}`));
+            const response = await axios.get(getApiUrl(`/api/estudiantes/verificar/${estudiante.cedula}`));
             if (response.data && response.data.data && response.data.data.length > 0) {
-              console.log(`Estudiante con código ${estudiante.codigo} ya existe`);
+              console.log(`Estudiante con cédula ${estudiante.cedula} ya existe`);
               yaExistentes++;
               const porcentaje = Math.round(((i + 1) / estudiantes.length) * 100);
               setProgreso(porcentaje);
@@ -235,12 +261,12 @@ const CrearEstudiante = ({ navigation, route }) => {
           const estudianteActual = estudiantes[i] || {};
           const nombre = estudianteActual.nombre || '';
           const apellido = estudianteActual.apellido || '';
-          const codigo = estudianteActual.codigo || '';
+          const codigo = estudianteActual.cedula || '';
           
           let mensajeError = `Error al importar a ${nombre} ${apellido} (${codigo}): `;
           
           if (error.response?.data?.message?.includes('duplicate')) {
-            mensajeError += `Ya existe un estudiante con el código ${codigo}`;
+            mensajeError += `Ya existe un estudiante con la cédula ${codigo}`;
             yaExistentes++;
             errores--;
           } else if (error.response?.status === 500) {
@@ -311,7 +337,7 @@ const CrearEstudiante = ({ navigation, route }) => {
       <ScrollView style={styles.content}>
         <View style={styles.formContainer}>
           <Text style={styles.formTitle}>Información del Estudiante</Text>
-          <Text style={styles.formDescription}>Complete los datos del estudiante para crear una nueva evaluación</Text>
+          <Text style={styles.formDescription}>Complete los datos del estudiante para crear una nueva disertación</Text>
           
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Nombre</Text>
@@ -334,22 +360,35 @@ const CrearEstudiante = ({ navigation, route }) => {
           </View>
           
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Código</Text>
+            <Text style={styles.label}>Cédula</Text>
             <TextInput
               style={styles.input}
-              placeholder="Ingrese el código o ID del estudiante"
-              value={formData.codigo}
-              onChangeText={(value) => handleChange('codigo', value)}
+              placeholder="Ingrese la cédula del estudiante"
+              value={formData.cedula}
+              onChangeText={(value) => handleChange('cedula', value)}
             />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Tipo de Disertación</Text>
+            <View style={styles.pickerContainer}>
+              <Picker
+                selectedValue={formData.tipo}
+                onValueChange={(itemValue) => handleChange('tipo', itemValue)}
+              >
+                <Picker.Item label="Antigua" value="antigua" />
+                <Picker.Item label="Actual" value="actual" />
+              </Picker>
+            </View>
           </View>
           
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Curso</Text>
+            <Text style={styles.label}>Maestría</Text>
             <TextInput
               style={styles.input}
-              placeholder="Ingrese el curso o materia"
-              value={formData.curso}
-              onChangeText={(value) => handleChange('curso', value)}
+              placeholder="Ingrese la maestría"
+              value={formData.maestria}
+              onChangeText={(value) => handleChange('maestria', value)}
             />
           </View>
           
@@ -551,6 +590,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginLeft: 10,
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    overflow: 'hidden',
+    marginTop: 4,
   },
   resultadoImportacion: {
     marginTop: 15,

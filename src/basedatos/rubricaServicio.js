@@ -6,7 +6,8 @@ const CLAVE_EVALUACIONES = '@app_notas:evaluaciones';
 /**
  * Datos de la rúbrica predefinida
  */
-const rubricaPredefinida = [
+// Rúbrica para evaluaciones *nuevas*
+const rubricaNueva = [
   {
     id: 1,
     criterio: "ACTITUD",

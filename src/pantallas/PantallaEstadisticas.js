@@ -224,7 +224,7 @@ const PantallaEstadisticas = ({ navigation }) => {
         </View>
         
         <View style={styles.seccion}>
-          <Text style={styles.tituloSeccion}>Por Criterio de Evaluación</Text>
+          <Text style={styles.tituloSeccion}>Por Criterio de Disertación</Text>
           
           {Object.keys(estadisticas.porCriterio).map((criterio) => {
             const datos = estadisticas.porCriterio[criterio];

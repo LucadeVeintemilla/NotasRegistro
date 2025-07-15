@@ -129,16 +129,7 @@ const PantallaInicio = ({ navigation }) => {
         <View style={styles.cardSection}>
           <Text style={styles.sectionTitle}>Gestión de Evaluaciones</Text>
           
-          <TouchableOpacity
-            style={[styles.card, { backgroundColor: colores.primario }]}
-            onPress={() => navigation.navigate('PantallaNuevaEvaluacion')}
-          >
-            <MaterialIcons name="add-circle" size={28} color="#fff" />
-            <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>Nueva Evaluación</Text>
-              <Text style={styles.cardDescription}>Registra una nueva evaluación para un estudiante</Text>
-            </View>
-          </TouchableOpacity>
+         
 
           <TouchableOpacity
             style={[styles.card, { backgroundColor: colores.secundario }]}
@@ -158,7 +149,7 @@ const PantallaInicio = ({ navigation }) => {
             <MaterialIcons name="person-add" size={28} color="#fff" />
             <View style={styles.cardContent}>
               <Text style={styles.cardTitle}>Crear Estudiante</Text>
-              <Text style={styles.cardDescription}>Añadir nuevo estudiante para evaluación</Text>
+              <Text style={styles.cardDescription}>Añadir nuevo estudiante para disertación</Text>
             </View>
           </TouchableOpacity>
           
@@ -168,8 +159,8 @@ const PantallaInicio = ({ navigation }) => {
           >
             <MaterialIcons name="schedule" size={28} color="#fff" />
             <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>Programar Evaluación</Text>
-              <Text style={styles.cardDescription}>Definir rango horario para evaluaciones</Text>
+              <Text style={styles.cardTitle}>Programar Disertación</Text>
+              <Text style={styles.cardDescription}>Definir rango horario para disertaciones</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -178,7 +169,7 @@ const PantallaInicio = ({ navigation }) => {
           <Text style={styles.sectionTitle}>Información</Text>
           
           <View style={styles.infoCard}>
-            <Text style={styles.infoTitle}>Rúbrica de Evaluación</Text>
+            <Text style={styles.infoTitle}>Rúbrica de Disertación</Text>
             <Text style={styles.infoContent}>
               El sistema utiliza una rúbrica estandarizada con los siguientes criterios principales:
             </Text>
@@ -201,7 +192,7 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: colores.primario,
-    padding: 15,
+    padding: 45,
     flexDirection: 'row',
     alignItems: 'center',
   },

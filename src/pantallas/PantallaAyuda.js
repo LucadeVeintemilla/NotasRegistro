@@ -26,7 +26,7 @@ const PantallaAyuda = ({ navigation }) => {
         <View style={styles.seccion}>
           <Text style={styles.tituloSeccion}>Sobre la Aplicación</Text>
           <Text style={styles.parrafo}>
-            Registro de Notas es una aplicación diseñada para facilitar la evaluación 
+            Registro de Notas es una aplicación diseñada para facilitar la disertación 
             de estudiantes durante la presentación de sus proyectos o tesis.
           </Text>
         </View>
@@ -37,29 +37,29 @@ const PantallaAyuda = ({ navigation }) => {
           <Text style={styles.subtituloSeccion}>Administrador</Text>
           <Text style={styles.parrafo}>
             • Puede crear estudiantes{'\n'}
-            • Puede programar evaluaciones con rangos horarios{'\n'}
-            • No puede calificar ni buscar evaluaciones
+            • Puede programar disertaciones con rangos horarios{'\n'}
+            • No puede calificar ni buscar disertaciones
           </Text>
           
           <Text style={styles.subtituloSeccion}>Lector</Text>
           <Text style={styles.parrafo}>
             • Solo puede calificar estudiantes ya creados{'\n'}
             • Solo puede calificar dentro del rango horario permitido{'\n'}
-            • Puede buscar evaluaciones realizadas
+            • Puede buscar disertaciones realizadas
           </Text>
           
           <Text style={styles.subtituloSeccion}>Director</Text>
           <Text style={styles.parrafo}>
             • Puede crear estudiantes{'\n'}
-            • Puede programar evaluaciones{'\n'}
-            • Puede calificar y buscar evaluaciones
+            • Puede programar disertaciones{'\n'}
+            • Puede calificar y buscar disertaciones
           </Text>
         </View>
 
         <View style={styles.seccion}>
           <Text style={styles.tituloSeccion}>Información de la Rúbrica</Text>
           <Text style={styles.parrafo}>
-            La rúbrica utilizada para las evaluaciones consta de 3 criterios principales:
+            La rúbrica utilizada para las disertaciones consta de 3 criterios principales:
           </Text>
           <View style={styles.listaCriterios}>
             <Text style={styles.itemCriterio}>• ACTITUD (2 indicadores)</Text>

@@ -49,8 +49,13 @@ const PantallaLogin = ({ navigation }) => {
           style={styles.logo}
           resizeMode="contain"
         />
-        <Text style={styles.titulo}>Registro de Notas</Text>
-        <Text style={styles.subtitulo}>Sistema de Evaluación</Text>
+        <Text style={styles.titulo}>Sistema de Evaluación</Text>
+        <Text style={styles.subtitulo}>Disertación Oral</Text>
+        <Image
+          source={require('../utilidades/Recurso 8.png')}
+          style={styles.imagen}
+          resizeMode="contain"
+        />
       </View>
       
       <View style={styles.formContainer}>
@@ -127,6 +132,11 @@ const styles = StyleSheet.create({
   subtitulo: {
     fontSize: 16,
     color: colores.texto,
+    marginBottom: 10,
+  },
+  imagen: {
+    width: 200,
+    height: 150,
     marginBottom: 20,
   },
   formContainer: {

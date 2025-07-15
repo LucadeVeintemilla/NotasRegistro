@@ -172,7 +172,7 @@ const PantallaDetalleEvaluacion = ({ route, navigation }) => {
   if (!evaluacion) {
     return (
       <View style={estilosGlobales.contenedorCentrado}>
-        <Text style={styles.textoError}>No se encontró la evaluación</Text>
+        <Text style={styles.textoError}>No se encontró la disertación</Text>
       </View>
     );
   }
@@ -183,7 +183,7 @@ const PantallaDetalleEvaluacion = ({ route, navigation }) => {
   return (
     <View style={estilosGlobales.contenedor}>
       <Cabecera
-        titulo="Detalle de Evaluación"
+        titulo="Detalle de Disertación"
         onAtras={() => navigation.goBack()}
       />
       
@@ -211,13 +211,13 @@ const PantallaDetalleEvaluacion = ({ route, navigation }) => {
             {nombreCompleto}
           </Text>
           <Text style={styles.campo}>
-            <Text style={styles.etiqueta}>Código: </Text>
-            {estudiante.codigo || 'No disponible'}
+            <Text style={styles.etiqueta}>Cédula: </Text>
+            {estudiante.cedula || 'No disponible'}
           </Text>
         </View>
 
         <View style={styles.seccion}>
-          <Text style={styles.tituloSeccion}>Detalles de la Evaluación</Text>
+          <Text style={styles.tituloSeccion}>Detalles de la Disertación</Text>
           <Text style={styles.campo}>
             <Text style={styles.etiqueta}>Fecha: </Text>
             {new Date(evaluacion.fecha).toLocaleDateString()}
@@ -303,7 +303,7 @@ const PantallaDetalleEvaluacion = ({ route, navigation }) => {
             </TouchableOpacity>
             
             <Text style={styles.modalTitle}>Enviar PDF por correo</Text>
-            <Text style={styles.modalSubtitle}>Ingrese la dirección de correo electrónico donde desea enviar la evaluación:</Text>
+            <Text style={styles.modalSubtitle}>Ingrese la dirección de correo electrónico donde desea enviar la disertación:</Text>
             
             <TextInput
               style={styles.emailInput}

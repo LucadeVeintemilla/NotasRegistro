@@ -34,7 +34,7 @@ const PantallaNuevaEvaluacion = ({ route, navigation }) => {
     nombre: '',
     apellido: '',
     codigo: '',
-    curso: '',
+    maestria: '',
     tutor: '',
   });
   const [titulo, setTitulo] = useState('');
@@ -141,7 +141,7 @@ const PantallaNuevaEvaluacion = ({ route, navigation }) => {
           nombre: datosEstudiante.nombre,
           apellido: datosEstudiante.apellido,
           codigo: datosEstudiante.codigo,
-          curso: datosEstudiante.curso,
+          maestria: datosEstudiante.maestria || '',
           tutor: datosEstudiante.tutor,
           tesis: titulo
         }
@@ -302,17 +302,17 @@ const PantallaNuevaEvaluacion = ({ route, navigation }) => {
             )}
           </View>
           <View style={styles.campo}>
-            <Text style={styles.etiqueta}>Curso:</Text>
+            <Text style={styles.etiqueta}>Maestría:</Text>
             {esEditable ? (
               <TextInput
                 style={estilosGlobales.input}
-                value={datosEstudiante.curso}
-                onChangeText={(texto) => setDatosEstudiante({ ...datosEstudiante, curso: texto })}
-                placeholder="Curso del estudiante"
+                value={datosEstudiante.maestria}
+                onChangeText={(texto) => setDatosEstudiante({ ...datosEstudiante, maestria: texto })}
+                placeholder="Ingrese la maestría del estudiante"
               />
             ) : (
               <View style={styles.campoNoEditable}>
-                <Text style={styles.textoNoEditable}>{datosEstudiante.curso}</Text>
+                <Text style={styles.textoNoEditable}>{datosEstudiante.maestria}</Text>
               </View>
             )}
           </View>
@@ -334,7 +334,7 @@ const PantallaNuevaEvaluacion = ({ route, navigation }) => {
         </View>
 
         <View style={styles.seccion}>
-          <Text style={styles.tituloSeccion}>Datos de la Evaluación</Text>
+          <Text style={styles.tituloSeccion}>Datos de la Disertación</Text>
           <View style={styles.campo}>
             <Text style={styles.etiqueta}>Título:</Text>
             <TextInput
@@ -351,7 +351,7 @@ const PantallaNuevaEvaluacion = ({ route, navigation }) => {
         </View>
 
         <View style={styles.seccion}>
-          <Text style={styles.tituloSeccion}>Rúbrica de Evaluación</Text>
+          <Text style={styles.tituloSeccion}>Rúbrica de Disertación</Text>
           <Text style={styles.instrucciones}>
             Seleccione una calificación para cada indicador. Las opciones van desde Deficiente hasta Excelente, 
             cada una con un valor específico que se sumará al puntaje total.
@@ -385,7 +385,7 @@ const PantallaNuevaEvaluacion = ({ route, navigation }) => {
           {enviando ? (
             <ActivityIndicator size="small" color={colores.textoClaro} />
           ) : (
-            <Text style={styles.textoBotonGuardar}>Guardar Evaluación</Text>
+            <Text style={styles.textoBotonGuardar}>Guardar Disertación</Text>
           )}
         </TouchableOpacity>
       </ScrollView>

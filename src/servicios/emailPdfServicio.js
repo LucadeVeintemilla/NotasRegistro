@@ -3,6 +3,7 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { Linking } from 'react-native';
 import { getApiUrl } from '../config/api';
+import { obtenerRubricaPorTipo } from '../basedatos/rubricas';
 
 const API_URL = 'http://192.168.100.35:3000/api/email';
 
@@ -20,7 +21,13 @@ export const generarHTML = (evaluacion) => {
   const notaFinal = evaluacion.notaFinal || 0;
   const notaEnLetras = convertirNumeroALetras(notaFinal);
   
-  const filasHTML = generarFilasCriterios(evaluacion.resultados);
+    const filasHTML = generarFilasCriterios(evaluacion.resultados);
+
+  // Encabezados dinámicos según el tipo de rúbrica (antigua o actual)
+  const tipoDisertacion = evaluacion.estudiante?.tipo || 'actual';
+  const rubrica = obtenerRubricaPorTipo(tipoDisertacion);
+  const columnas = rubrica[0]?.indicadores[0]?.opciones.map(o => o.label.toUpperCase()) || [];
+  const headerColsHTML = columnas.map(c => `<th>${c}</th>`).join('');
 
   return `
     <!DOCTYPE html>
@@ -106,7 +113,7 @@ export const generarHTML = (evaluacion) => {
           </tr>
           <tr>
             <td class="label" style="font-weight: bold; width: 30%; background-color: #f0f0f0;">Programa:</td>
-            <td>${evaluacion.estudiante.curso || ''}</td>
+            <td>${evaluacion.estudiante.maestria || ''}</td>
           </tr>
           <tr>
             <td class="label" style="font-weight: bold; width: 30%; background-color: #f0f0f0;">Tema del Trabajo de Titulación:</td>
@@ -123,11 +130,7 @@ export const generarHTML = (evaluacion) => {
             <tr>
               <th>CRITERIOS</th>
               <th>INDICADOR</th>
-              <th>DEFICIENTE</th>
-              <th>REGULAR</th>
-              <th>BUENO</th>
-              <th>MUY BUENO</th>
-              <th>EXCELENTE</th>
+              ${headerColsHTML}
               <th>PUNTAJE</th>
             </tr>
           </thead>

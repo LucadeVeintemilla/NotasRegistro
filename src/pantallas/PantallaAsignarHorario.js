@@ -80,12 +80,12 @@ const PantallaAsignarHorario = ({ navigation }) => {
           <Text style={styles.tituloSeccion}>Datos del Horario</Text>
           
           <View style={styles.campo}>
-            <Text style={styles.etiqueta}>ID de Evaluación:</Text>
+            <Text style={styles.etiqueta}>ID de Disertación:</Text>
             <TextInput
               style={estilosGlobales.input}
               value={horario.evaluacionId}
               onChangeText={(texto) => setHorario({ ...horario, evaluacionId: texto })}
-              placeholder="ID de la evaluación"
+              placeholder="ID de la disertación"
             />
           </View>
 

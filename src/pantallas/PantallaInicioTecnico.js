@@ -68,6 +68,17 @@ const PantallaInicioTecnico = ({ navigation }) => {
               <Text style={styles.cardTitle}>Registrar Usuario</Text>
               <Text style={styles.cardDescription}>Añadir nuevo usuario con rol Lector o Director</Text>
             </View>
+</TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.card, { backgroundColor: colores.primario }]}
+            onPress={() => navigation.navigate('ProgramarEvaluacion')}
+          >
+            <MaterialIcons name="event" size={28} color="#fff" />
+            <View style={styles.cardContent}>
+              <Text style={styles.cardTitle}>Programar Evaluación</Text>
+              <Text style={styles.cardDescription}>Crear nueva disertación con fecha y hora</Text>
+            </View>
           </TouchableOpacity>
         </View>
 
@@ -83,6 +94,7 @@ const PantallaInicioTecnico = ({ navigation }) => {
               <Text style={styles.infoItem}>• Registrar nuevos usuarios con rol Lector</Text>
               <Text style={styles.infoItem}>• Registrar nuevos usuarios con rol Director</Text>
               <Text style={styles.infoItem}>• Gestionar las cuentas creadas</Text>
+              <Text style={styles.infoItem}>• Programar nuevas evaluaciones</Text>
             </View>
           </View>
         </View>

@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-import { obtenerRubricaCompleta } from '../basedatos/rubricaServicio';
+import { obtenerRubricaPorTipo } from '../basedatos/rubricas';
 import Cabecera from '../componentes/Cabecera';
 import CriterioEvaluacion from '../componentes/CriterioEvaluacion';
 import { colores, estilosGlobales } from '../estilos/estilosGlobales';
@@ -31,8 +31,9 @@ const PantallaCalificarEvaluacion = ({ route, navigation }) => {
     evaluacionCompleta,
     estudianteNombre,
     estudianteApellido,
-    estudianteCodigo,
-    estudianteCurso,
+    estudianteCedula,
+    estudianteTipo,
+    estudianteMaestria,
     titulo: tituloEvaluacion
   } = route.params || {};
 
@@ -42,8 +43,9 @@ const PantallaCalificarEvaluacion = ({ route, navigation }) => {
   const [datosEstudiante, setDatosEstudiante] = useState({
     nombre: '',
     apellido: '',
-    codigo: '',
-    curso: '',
+    cedula: '',
+    tipo: 'actual',
+    maestria: '',
   });
   const [titulo, setTitulo] = useState('');
   const [valoresSeleccionados, setValoresSeleccionados] = useState({});
@@ -59,8 +61,11 @@ const PantallaCalificarEvaluacion = ({ route, navigation }) => {
         const userData = await getCurrentUser();
         setEvaluadorData(userData);
         
-        const datosRubrica = await obtenerRubricaCompleta();
+        const tipoDisertacion = (evaluacionCompleta?.estudiante?.tipo) || estudianteTipo || 'actual';
+        console.log('Tipo disertación detectado:', tipoDisertacion);
+        const datosRubrica = obtenerRubricaPorTipo(tipoDisertacion);
         setRubrica(datosRubrica);
+        setDatosEstudiante(prev => ({ ...prev, tipo: tipoDisertacion }));
         
         if (evaluacionId) {
           if (evaluacionCompleta) {
@@ -72,8 +77,8 @@ const PantallaCalificarEvaluacion = ({ route, navigation }) => {
 
             if (ahora < horarioInicio) {
               Alert.alert(
-                'Evaluación no disponible',
-                'Esta evaluación aún no ha comenzado. Por favor, espere hasta la hora programada.',
+                'Disertación no disponible',
+                'Esta disertación aún no ha comenzado. Por favor, espere hasta la hora programada.',
                 [{ 
                   text: 'OK',
                   onPress: () => navigation.goBack()
@@ -98,8 +103,9 @@ const PantallaCalificarEvaluacion = ({ route, navigation }) => {
           setDatosEstudiante({
             nombre: estudianteNombre || '',
             apellido: estudianteApellido || '',
-            codigo: estudianteCodigo || '',
-            curso: estudianteCurso || '',
+            cedula: estudianteCedula || '',
+            tipo: estudianteTipo || 'actual',
+            maestria: estudianteMaestria || '',
           });
           
           setTitulo(tituloEvaluacion || '');
@@ -251,7 +257,7 @@ const PantallaCalificarEvaluacion = ({ route, navigation }) => {
     return (
       <View style={estilosGlobales.contenedorCentrado}>
         <ActivityIndicator size="large" color={colores.primario} />
-        <Text style={styles.textoEspera}>Cargando evaluación...</Text>
+        <Text style={styles.textoEspera}>Cargando disertación...</Text>
       </View>
     );
   }
@@ -288,7 +294,7 @@ const PantallaCalificarEvaluacion = ({ route, navigation }) => {
         </View>
 
         <View style={styles.seccion}>
-          <Text style={styles.tituloSeccion}>Datos de la Evaluación</Text>
+          <Text style={styles.tituloSeccion}>Datos de la Disertación</Text>
           
           <View style={styles.campo}>
             <Text style={styles.etiqueta}>Título:</Text>
@@ -304,7 +310,7 @@ const PantallaCalificarEvaluacion = ({ route, navigation }) => {
         </View>
 
         <View style={styles.seccion}>
-          <Text style={styles.tituloSeccion}>Rúbrica de Evaluación</Text>
+          <Text style={styles.tituloSeccion}>Rúbrica de Disertación</Text>
           <Text style={styles.instrucciones}>
             Seleccione una calificación para cada indicador. Las opciones van desde Deficiente hasta Excelente, 
             cada una con un valor específico que se sumará al puntaje total.

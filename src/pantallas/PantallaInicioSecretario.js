@@ -81,7 +81,7 @@ const PantallaInicioSecretario = ({ navigation }) => {
             <MaterialIcons name="person-add" size={28} color="#fff" />
             <View style={styles.cardContent}>
               <Text style={styles.cardTitle}>Crear Estudiante</Text>
-              <Text style={styles.cardDescription}>Añadir nuevo estudiante para evaluación</Text>
+              <Text style={styles.cardDescription}>Añadir nuevo estudiante para disertación</Text>
             </View>
           </TouchableOpacity>
           
@@ -91,8 +91,8 @@ const PantallaInicioSecretario = ({ navigation }) => {
           >
             <MaterialIcons name="schedule" size={28} color="#fff" />
             <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>Programar Evaluación</Text>
-              <Text style={styles.cardDescription}>Definir rango horario para evaluaciones</Text>
+              <Text style={styles.cardTitle}>Programar Disertación</Text>
+              <Text style={styles.cardDescription}>Definir rango horario para disertaciones</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -107,8 +107,8 @@ const PantallaInicioSecretario = ({ navigation }) => {
             </Text>
             <View style={styles.infoList}>
               <Text style={styles.infoItem}>• Registrar nuevos usuarios con rol Lector o Director</Text>
-              <Text style={styles.infoItem}>• Crear nuevos estudiantes para evaluación</Text>
-              <Text style={styles.infoItem}>• Programar evaluaciones y definir horarios</Text>
+              <Text style={styles.infoItem}>• Crear nuevos estudiantes para disertación</Text>
+              <Text style={styles.infoItem}>• Programar disertaciones y definir horarios</Text>
             </View>
           </View>
         </View>

@@ -7,7 +7,7 @@ import { colores } from '../estilos/estilosGlobales';
 import { registrarPorTecnico } from '../servicios/auth/authService';
 import validarCedula from '../utils/validarCedula';
 
-const PantallaRegistroUsuarios = ({ navigation }) => {
+const PantallaRegistroUsuariosAdmin = ({ navigation }) => {
   const [tipoDocumento, setTipoDocumento] = useState('cedula');
   const [errorCedula, setErrorCedula] = useState('');
   
@@ -60,8 +60,8 @@ const PantallaRegistroUsuarios = ({ navigation }) => {
       return Alert.alert('Error', 'El formato del correo electrónico no es válido');
     }
 
-    if (formData.tipo !== 'lector' && formData.tipo !== 'director') {
-      return Alert.alert('Error', 'Solo puede registrar usuarios con rol de lector o director');
+    if (formData.tipo !== 'lector' && formData.tipo !== 'secretario' && formData.tipo !== 'tecnico') {
+      return Alert.alert('Error', 'Solo puede registrar usuarios con rol de lector, secretario o tecnico');
     }
 
     try {
@@ -91,10 +91,16 @@ const PantallaRegistroUsuarios = ({ navigation }) => {
       );
     } catch (error) {
       console.error('Error de registro:', error);
-      Alert.alert(
-        'Error de registro',
-        error.message || 'No se pudo completar el registro. Inténtelo nuevamente.'
-      );
+      if (error.message && error.message.toLowerCase().includes('no está autorizado')) {
+        Alert.alert('Sin autorización', 'Su sesión no tiene permisos para esta acción.', [
+          { text: 'OK', onPress: () => navigation.navigate('PantallaInicioAdmin') }
+        ]);
+      } else {
+        Alert.alert(
+          'Error de registro',
+          error.message || 'No se pudo completar el registro. Inténtelo nuevamente.'
+        );
+      }
     } finally {
       setCargando(false);
     }
@@ -202,7 +208,8 @@ const PantallaRegistroUsuarios = ({ navigation }) => {
               onValueChange={(value) => handleChange('tipo', value)}
             >
               <Picker.Item label="Lector" value="lector" />
-              <Picker.Item label="Director" value="director" />
+              <Picker.Item label="Secretario" value="secretario" />
+              <Picker.Item label="Tecnico" value="tecnico" />
             </Picker>
           </View>
         </View>
@@ -325,4 +332,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PantallaRegistroUsuarios;
+export default PantallaRegistroUsuariosAdmin;

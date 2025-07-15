@@ -20,6 +20,8 @@ import PantallaLogin from '../pantallas/PantallaLogin';
 import PantallaNuevaEvaluacion from '../pantallas/PantallaNuevaEvaluacion';
 import PantallaRegistro from '../pantallas/PantallaRegistro';
 import PantallaRegistroUsuarios from '../pantallas/PantallaRegistroUsuarios';
+import PantallaRegistroUsuariosAdmin from '../pantallas/PantallaRegistroUsuariosAdmin';
+import PantallaGestionUsuarios from '../pantallas/PantallaGestionUsuarios';
 import ProgramarEvaluacion from '../pantallas/ProgramarEvaluacion';
 import CambiarContrasena from '../pantallas/CambiarContrasena';
 
@@ -42,6 +44,8 @@ const AuthStack = () => (
 const AdminStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="PantallaInicioAdmin" component={PantallaInicioAdmin} />
+    <Stack.Screen name="PantallaRegistroUsuariosAdmin" component={PantallaRegistroUsuariosAdmin} />
+    <Stack.Screen name="PantallaGestionUsuarios" component={PantallaGestionUsuarios} />
     <Stack.Screen name="CrearEstudiante" component={CrearEstudiante} />
     <Stack.Screen name="ProgramarEvaluacion" component={ProgramarEvaluacion} />
     <Stack.Screen name="PantallaAyuda" component={PantallaAyuda} />
@@ -79,6 +83,7 @@ const TecnicoStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="PantallaInicioTecnico" component={PantallaInicioTecnico} />
     <Stack.Screen name="PantallaRegistroUsuarios" component={PantallaRegistroUsuarios} />
+    <Stack.Screen name="ProgramarEvaluacion" component={ProgramarEvaluacion} />
     <Stack.Screen name="PantallaAyuda" component={PantallaAyuda} />
   </Stack.Navigator>
 );
