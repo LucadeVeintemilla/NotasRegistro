@@ -73,6 +73,7 @@ const DirectorStack = () => (
     <Stack.Screen name="PantallaNuevaEvaluacion" component={PantallaNuevaEvaluacion} />
     <Stack.Screen name="PantallaBuscarEvaluaciones" component={PantallaBuscarEvaluaciones} />
     <Stack.Screen name="PantallaDetalleEvaluacion" component={PantallaDetalleEvaluacion} />
+    <Stack.Screen name="PantallaCalificarEvaluacion" component={PantallaCalificarEvaluacion} />
     <Stack.Screen name="PantallaEstadisticas" component={PantallaEstadisticas} />
     <Stack.Screen name="PantallaAyuda" component={PantallaAyuda} />
     <Stack.Screen name="CambiarContrasena" component={CambiarContrasena} />

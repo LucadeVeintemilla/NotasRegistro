@@ -45,7 +45,8 @@ const ProgramarEvaluacion = ({ route, navigation }) => {
       const respEstudiantes = await axios.get(getApiUrl('/api/estudiantes'));
       setEstudiantes(respEstudiantes.data.data);
       
-      const respUsuarios = await axios.get(getApiUrl('/api/auth/usuarios?tipo=lector'));
+      // Obtener tanto lectores como directores como posibles evaluadores
+      const respUsuarios = await axios.get(getApiUrl('/api/auth/usuarios?tipo[in]=lector,director'));
       setEvaluadores(respUsuarios.data.data);
       
       if (estudianteSeleccionado) {

@@ -16,7 +16,8 @@ import { colores, estilosGlobales } from '../estilos/estilosGlobales';
 import { getCurrentUser, setAuthToken } from '../servicios/auth/authService';
 import { getApiUrl } from '../config/api';
 
-const PantallaBuscarEvaluaciones = ({ navigation }) => {
+const PantallaBuscarEvaluaciones = ({ navigation, route }) => {
+  const { modoCalificacion } = route.params || {};
   const [evaluaciones, setEvaluaciones] = useState([]);
   const [evaluacionesFiltradas, setEvaluacionesFiltradas] = useState([]);
   const [cargando, setCargando] = useState(true);
@@ -91,7 +92,22 @@ const PantallaBuscarEvaluaciones = ({ navigation }) => {
         style={[
           styles.tarjetaEvaluacion,
           !estaDisponible && styles.tarjetaNoDisponible        ]}
-        onPress={() => navigation.navigate('PantallaDetalleEvaluacion', { evaluacionId: item._id })}
+        onPress={() => {
+          if (modoCalificacion) {
+            navigation.navigate('PantallaCalificarEvaluacion', { 
+              evaluacionId: item._id,
+              evaluacionCompleta: item,
+              estudianteNombre: item.estudiante?.nombre,
+              estudianteApellido: item.estudiante?.apellido,
+              estudianteCedula: item.estudiante?.cedula,
+              estudianteTipo: item.estudiante?.tipo,
+              estudianteMaestria: item.estudiante?.maestria,
+              titulo: item.titulo
+            });
+          } else {
+            navigation.navigate('PantallaDetalleEvaluacion', { evaluacionId: item._id });
+          }
+        }}
       >
         <View style={styles.contenidoTarjeta}>
           <View style={styles.infoEvaluacion}>
@@ -138,7 +154,7 @@ const PantallaBuscarEvaluaciones = ({ navigation }) => {
   return (
     <View style={estilosGlobales.contenedor}>
       <Cabecera 
-        titulo="Mis Evaluaciones" 
+        titulo={modoCalificacion ? "Calificar Evaluaciones" : "Mis Evaluaciones"} 
         onAtras={() => navigation.goBack()}
       />
       

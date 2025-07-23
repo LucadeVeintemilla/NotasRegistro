@@ -144,6 +144,17 @@ const PantallaInicio = ({ navigation }) => {
 
           <TouchableOpacity
             style={[styles.card, { backgroundColor: colores.primario }]}
+            onPress={() => navigation.navigate('PantallaBuscarEvaluaciones', { modoCalificacion: true })}
+          >
+            <MaterialIcons name="assignment" size={28} color="#fff" />
+            <View style={styles.cardContent}>
+              <Text style={styles.cardTitle}>Calificar Evaluación</Text>
+              <Text style={styles.cardDescription}>Buscar y calificar evaluaciones pendientes</Text>
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.card, { backgroundColor: colores.primario }]}
             onPress={() => navigation.navigate('CrearEstudiante')}
           >
             <MaterialIcons name="person-add" size={28} color="#fff" />
