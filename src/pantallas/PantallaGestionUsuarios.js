@@ -22,7 +22,14 @@ const PantallaGestionUsuarios = ({ navigation }) => {
   const [cargando, setCargando] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [usuarioEdit, setUsuarioEdit] = useState(null);
-  const [formData, setFormData] = useState({ nombre: '', apellido: '', correo: '', telefono: '', tipo: 'lector' });
+  const [formData, setFormData] = useState({ 
+    nombre: '', 
+    apellido: '', 
+    correo: '', 
+    telefono: '', 
+    tipo: 'lector',
+    contraseña: ''
+  });
 
   const fetchUsuarios = async () => {
     try {
@@ -55,12 +62,38 @@ const PantallaGestionUsuarios = ({ navigation }) => {
 
   const handleGuardar = async () => {
     try {
-      await actualizarUsuario(usuarioEdit.id || usuarioEdit._id, formData);
+      // Validar formato de correo
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (formData.correo && !emailRegex.test(formData.correo)) {
+        Alert.alert('Error', 'Por favor ingrese un correo electrónico válido');
+        return;
+      }
+
+      // Validar longitud de contraseña si se proporciona
+      if (formData.contraseña && formData.contraseña.length < 6) {
+        Alert.alert('Error', 'La contraseña debe tener al menos 6 caracteres');
+        return;
+      }
+
+      // Crear un objeto con solo los campos que tienen valor (excepto contraseña vacía)
+      const datosActualizacion = { ...formData };
+      if (!datosActualizacion.contraseña) {
+        delete datosActualizacion.contraseña;
+      }
+      
+      await actualizarUsuario(usuarioEdit.id || usuarioEdit._id, datosActualizacion);
       Alert.alert('Éxito', 'Usuario actualizado');
       setModalVisible(false);
       fetchUsuarios();
     } catch (err) {
-      Alert.alert('Error', err.message || 'No se pudo actualizar');
+      // Mostrar mensajes de error más amigables
+      if (err.message.includes('shorter than the minimum allowed length')) {
+        Alert.alert('Error', 'La contraseña debe tener al menos 6 caracteres');
+      } else if (err.message.includes('correo') || err.message.includes('correo electrónico')) {
+        Alert.alert('Error', 'Por favor ingrese un correo electrónico válido');
+      } else {
+        Alert.alert('Error', err.message || 'No se pudo actualizar');
+      }
     }
   };
 
@@ -129,13 +162,15 @@ const PantallaGestionUsuarios = ({ navigation }) => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>Editar Usuario</Text>
-            {['nombre','apellido','correo','telefono'].map((campo)=>(
+            {['nombre','apellido','correo','telefono','contraseña'].map((campo)=>(
               <View key={campo} style={styles.inputRow}>
                 <Text style={styles.label}>{campo.charAt(0).toUpperCase()+campo.slice(1)}</Text>
                 <TextInput
                   style={[styles.input,{flex:1}]}
                   value={formData[campo]}
                   onChangeText={(v)=>setFormData({...formData,[campo]:v})}
+                  secureTextEntry={campo === 'contraseña'}
+                  placeholder={campo === 'contraseña' ? 'Dejar en blanco para no cambiar' : ''}
                 />
               </View>
             ))}
