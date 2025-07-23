@@ -85,6 +85,7 @@ const PantallaRegistroUsuarios = ({ navigation }) => {
                 contraseña: '',
                 tipo: 'lector'
               });
+              navigation.navigate('PantallaInicioSecretario');
             }
           }
         ]

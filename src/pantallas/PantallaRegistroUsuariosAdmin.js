@@ -85,6 +85,8 @@ const PantallaRegistroUsuariosAdmin = ({ navigation }) => {
                 contraseña: '',
                 tipo: 'lector'
               });
+              navigation.navigate('PantallaInicioAdmin');
+
             }
           }
         ]
