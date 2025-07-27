@@ -18,6 +18,7 @@ import { colores, estilosGlobales } from '../estilos/estilosGlobales';
 import { setAuthToken } from '../servicios/auth/authService';
 import { enviarCorreoConPDF, generarYCompartirPDF } from '../servicios/emailPdfServicio';
 import { getApiUrl } from '../config/api';
+import { CommonActions } from '@react-navigation/native';
 
 /**
  * Pantalla que muestra el detalle de una evaluación
@@ -284,6 +285,17 @@ const PantallaDetalleEvaluacion = ({ route, navigation }) => {
             <MaterialIcons name="email" size={20} color={colores.textoClaro} />
             <Text style={styles.textoBotonCompartir}>Enviar por Email</Text>
           </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={[styles.botonVolverInicio, { marginTop: 10 }]}
+            onPress={() => {
+              setModalVisible(false);
+              navigation.popToTop();
+            }}
+          >
+            <MaterialIcons name="home" size={20} color={colores.textoClaro} />
+            <Text style={styles.textoBotonVolver}>Volver al Inicio</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
       
@@ -444,6 +456,26 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
     marginLeft: 8,
+  },
+  botonVolverInicio: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colores.secundario,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+  textoBotonVolver: {
+    color: colores.textoClaro,
+    marginLeft: 8,
+    fontSize: 16,
+    fontWeight: '600',
   },
   modalContainer: {
     flex: 1,

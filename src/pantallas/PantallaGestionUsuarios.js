@@ -124,9 +124,7 @@ const PantallaGestionUsuarios = ({ navigation }) => {
         <TouchableOpacity onPress={() => abrirModalEdicion(item)} style={styles.actionButton}>
           <MaterialIcons name="edit" size={24} color="#fff" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleEliminar(item)} style={[styles.actionButton,{backgroundColor:colores.deficiente}]}>
-          <MaterialIcons name="delete" size={24} color="#fff" />
-        </TouchableOpacity>
+        
       </View>
     </View>
   );

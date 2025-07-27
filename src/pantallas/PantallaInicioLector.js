@@ -8,7 +8,7 @@ import { colores } from '../estilos/estilosGlobales';
 import { getCurrentUser, logout, setAuthToken } from '../servicios/auth/authService';
 import { getApiUrl } from '../config/api';
 
-const PantallaInicioLector = ({ navigation }) => {
+const PantallaInicioLector = ({ navigation, route }) => {
   const [usuario, setUsuario] = useState(null);
   const [evaluacionesPendientes, setEvaluacionesPendientes] = useState([]);
   const [cargando, setCargando] = useState(true);
@@ -46,6 +46,14 @@ const PantallaInicioLector = ({ navigation }) => {
     
     cargarDatos();
   }, []);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      cargarEvaluacionesPendientes();
+    });
+
+    return unsubscribe;
+  }, [navigation, cargarEvaluacionesPendientes]);
 
   const cargarUsuario = async () => {
     const userData = await getCurrentUser();

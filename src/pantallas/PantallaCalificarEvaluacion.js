@@ -17,6 +17,7 @@ import CriterioEvaluacion from '../componentes/CriterioEvaluacion';
 import { colores, estilosGlobales } from '../estilos/estilosGlobales';
 import { getCurrentUser, setAuthToken } from '../servicios/auth/authService';
 import { getApiUrl } from '../config/api';
+import { CommonActions } from '@react-navigation/native';
 
 /**
  * Pantalla para que los lectores califiquen evaluaciones
@@ -198,6 +199,9 @@ const PantallaCalificarEvaluacion = ({ route, navigation }) => {
                 throw new Error('No se pudo obtener información del usuario');
               }
 
+              const esDirector = userData.role === 'director';
+              const esLector = userData.role === 'lector';
+              
               const resultados = [];
               Object.entries(valoresSeleccionados).forEach(([indicadorId, valor]) => {
                 for (const criterio of rubrica) {
@@ -230,11 +234,15 @@ const PantallaCalificarEvaluacion = ({ route, navigation }) => {
                 'La evaluación se ha guardado correctamente',
                 [
                   {
-                    text: 'Volver al Inicio',
+                    text: 'Ver Detalle',
                     onPress: () => {
-                      navigation.navigate('PantallaInicioLector');
+                      navigation.navigate('PantallaDetalleEvaluacion', { 
+                        evaluacionId: evaluacionId,
+                        esLector: esLector 
+                      });
                     },
                   },
+                  
                 ]
               );
 

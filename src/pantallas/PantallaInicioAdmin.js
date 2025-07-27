@@ -84,7 +84,7 @@ const PantallaInicioAdmin = ({ navigation }) => {
             </View>
           </TouchableOpacity>
 
-          <Text style={styles.sectionTitle}>Gestión de Evaluaciones</Text>
+          <Text style={styles.sectionTitle}>Gestión de Disertaciones</Text>
           
           <TouchableOpacity
             style={[styles.card, { backgroundColor: colores.primario }]}
