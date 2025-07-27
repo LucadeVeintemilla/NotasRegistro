@@ -93,6 +93,15 @@ const PantallaBuscarEvaluaciones = ({ navigation, route }) => {
           styles.tarjetaEvaluacion,
           !estaDisponible && styles.tarjetaNoDisponible        ]}
         onPress={() => {
+          // Si la evaluación ya está completada, redirigir a detalles
+          if (item.estado === 'completada') {
+            navigation.navigate('PantallaDetalleEvaluacion', { 
+              evaluacionId: item._id,
+              esLector: false // Indica que viene del director
+            });
+            return;
+          }
+          
           if (modoCalificacion) {
             navigation.navigate('PantallaCalificarEvaluacion', { 
               evaluacionId: item._id,
@@ -105,7 +114,10 @@ const PantallaBuscarEvaluaciones = ({ navigation, route }) => {
               titulo: item.titulo
             });
           } else {
-            navigation.navigate('PantallaDetalleEvaluacion', { evaluacionId: item._id });
+            navigation.navigate('PantallaDetalleEvaluacion', { 
+              evaluacionId: item._id,
+              esLector: false // Indica que viene del director
+            });
           }
         }}
       >

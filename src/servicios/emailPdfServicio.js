@@ -171,7 +171,7 @@ export const generarHTML = (evaluacion) => {
           <br><br>
           <strong>Docente Evaluador</strong>
           <br>
-          ${evaluacion.evaluador || ''}
+          ${evaluacion.evaluador.nombre + ' ' + evaluacion.evaluador.apellido || ''}
         </div>
       </div>
     </body>
