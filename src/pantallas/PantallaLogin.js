@@ -20,16 +20,25 @@ const PantallaLogin = ({ navigation }) => {
       const data = await login(correo, contraseña);
       
  
-      auth.refreshAuth();
-      
+      const alertButtons = [
+        {
+          text: 'OK',
+          onPress: () => auth.refreshAuth()
+        }
+      ];
+      if (data.usuario.tipo === 'lector') {
+        alertButtons.push({
+          text: 'Cambiar Contraseña',
+          onPress: () => {
+            navigation.navigate('CambiarContrasena');
+          }
+        });
+      }
+
       Alert.alert(
         'Inicio de sesión exitoso',
         `Bienvenido ${data.usuario.nombre}`,
-        [
-          {
-            text: 'OK'
-          }
-        ]
+        alertButtons
       );
     } catch (error) {
       console.error('Error de login:', error);
@@ -52,7 +61,7 @@ const PantallaLogin = ({ navigation }) => {
         <Text style={styles.titulo}>Sistema de Evaluación</Text>
         <Text style={styles.subtitulo}>Disertación Oral</Text>
         <Image
-          source={require('../utilidades/Recurso 8.png')}
+          source={require('../utilidades/Recurso 8.jpg')}
           style={styles.imagen}
           resizeMode="contain"
         />

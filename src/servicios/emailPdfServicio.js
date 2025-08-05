@@ -1,6 +1,13 @@
 import * as FileSystem from 'expo-file-system';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
+import { Asset } from 'expo-asset';
+
+async function obtenerLogoUri() {
+  const asset = Asset.fromModule(require('../utilidades/Recurso 8.png'));
+  await asset.downloadAsync();          
+  return asset.localUri || asset.uri;   
+}
 import { Linking } from 'react-native';
 import { getApiUrl } from '../config/api';
 import { obtenerRubricaPorTipo } from '../basedatos/rubricas';
@@ -12,7 +19,9 @@ const API_URL = 'http://192.168.100.35:3000/api/email';
  * @param {Object} evaluacion Objeto con todos los datos de la evaluación
  * @returns {string} Contenido HTML para el PDF
  */
-export const generarHTML = (evaluacion) => {
+export const generarHTML = async (evaluacion) => {
+  const logoUri = await obtenerLogoUri();
+
   if (!evaluacion || !evaluacion.resultados || !evaluacion.estudiante) {
     console.error('Datos de evaluación incompletos');
     return '';
@@ -28,156 +37,186 @@ export const generarHTML = (evaluacion) => {
   const rubrica = obtenerRubricaPorTipo(tipoDisertacion);
   const columnas = rubrica[0]?.indicadores[0]?.opciones.map(o => o.label.toUpperCase()) || [];
   const headerColsHTML = columnas.map(c => `<th>${c}</th>`).join('');
-
+ 
   return `
-    <!DOCTYPE html>
-    <html lang="es">
-    <head>
-      <meta charset="UTF-8">
-      <title>Criterios de Evaluación - ${evaluacion.estudiante.nombre} ${evaluacion.estudiante.apellido}</title>
-      <style>
-        body {
-          font-family: Arial, sans-serif;
-          max-width: 210mm;
-          margin: 0 auto;
-          padding: 10px;
-          background-color: #f5f5f5;
-          font-size: 11px;
-        }
-        .container {
-          background-color: white;
-          padding: 20px;
-          box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-          text-align: center;
-          font-size: 16px;
-          text-transform: uppercase;
-          margin-bottom: 20px;
-        }
-        .label {
-          font-weight: bold;
-          width: 30%;
-          background-color: #f0f0f0;
-        }
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          margin-bottom: 20px;
-          table-layout: fixed;
-        }
-        th, td {
-          border: 1px solid #444;
-          padding: 4px 2px;
-          text-align: center;
-          font-size: 10px;
-          word-wrap: break-word;
-        }
-        th {
-          background-color: #eee;
-          font-size: 10px;
-        }
-        p {
-          text-align: center;
-        }
-        .firma {
-          margin-top: 40px;
-          margin-bottom: 20px;
-          text-align: center;
-          page-break-before: avoid;
-          page-break-inside: avoid;
-        }
-        .firma-line {
-          width: 250px;
-          border-top: 1px solid #000;
-          margin: 10px auto;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="container">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Criterios de Evaluación - ${evaluacion.estudiante.nombre} ${evaluacion.estudiante.apellido}</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 210mm;
+      margin: 0 auto;
+      padding: 10px;
+      background-color: #f5f5f5;
+      font-size: 11px;
+    }
+    .container {
+      background-color: white;
+      padding: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+      font-size: 16px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    h2 {
+      text-align: center;
+      font-size: 14px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .label {
+      font-weight: bold;
+      width: 30%;
+      background-color: #f0f0f0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 10px;
+      table-layout: fixed;
+    }
+    th, td {
+      border: 1px solid #444;
+      padding: 4px 2px;
+      text-align: center;
+      font-size: 10px;
+      word-wrap: break-word;
+    }
+    th {
+      background-color: #eee;
+      font-size: 10px;
+    }
+    p {
+      text-align: center;
+    }
+    .firma {
+  margin-top: 100px; 
+  text-align: center;
+}
+
+.firma-line {
+  width: 250px;
+  border-top: 1px solid #000;
+  margin: 40px auto 10px auto; 
+}
+    .header {
+      display: flex;
+      align-items: center;
+    }
+    .titles {
+      flex: 1;
+    }
+    /* Sección compacta para calificaciones */
+    table.calificaciones {
+      font-size: 9px;
+      line-height: 1.1;
+    }
+    table.calificaciones th,
+    table.calificaciones td {
+      padding: 2px 1px;
+    }
+  </style>
+</head>
+  
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="titles">
+        <h1>UNIVERSIDAD CENTRAL ECUADOR<br>FACULTAD DE INGENIERÍA Y CIENCIAS APLICADAS</h1>
+        <h2>CONSEJO DE POSGRADO</h2>
+        <h2>_______________________________________________________________________</h2>
         <h1>RÚBRICA DE EVALUACIÓN<br>DE LA DISERTACIÓN ORAL DEL TRABAJO DE TITULACIÓN</h1>
-
-        <table style="margin-top: 20px;">
-          <tr>
-            <td class="label" style="font-weight: bold; width: 30%; background-color: #f0f0f0;">Estudiante:</td>
-            <td>${evaluacion.estudiante.nombre} ${evaluacion.estudiante.apellido}</td>
-          </tr>
-          <tr>
-            <td class="label" style="font-weight: bold; width: 30%; background-color: #f0f0f0;">Tutor:</td>
-            <td>${evaluacion.estudiante.tutor || ''}</td>
-          </tr>
-          <tr>
-            <td class="label" style="font-weight: bold; width: 30%; background-color: #f0f0f0;">Nombre del Miembro del Tribunal:</td>
-            <td>${evaluacion.evaluador.nombre + ' ' + evaluacion.evaluador.apellido || ''}</td>
-          </tr>
-          <tr>
-            <td class="label" style="font-weight: bold; width: 30%; background-color: #f0f0f0;">Programa:</td>
-            <td>${evaluacion.estudiante.maestria || ''}</td>
-          </tr>
-          <tr>
-            <td class="label" style="font-weight: bold; width: 30%; background-color: #f0f0f0;">Tema del Trabajo de Titulación:</td>
-            <td>${evaluacion.estudiante.tesis || ''}</td>
-          </tr>
-          <tr>
-            <td class="label" style="font-weight: bold; width: 30%; background-color: #f0f0f0;">Fecha:</td>
-            <td>${new Date(evaluacion.fecha).toLocaleDateString()}</td>
-          </tr>
-        </table>
-
-        <table>
-          <thead>
-            <tr>
-              <th>CRITERIOS</th>
-              <th>INDICADOR</th>
-              ${headerColsHTML}
-              <th>PUNTAJE</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${filasHTML}
-            <tr>
-              <td colspan="7" style="text-align: right; font-weight: bold;">TOTAL</td>
-              <td style="font-weight: bold;">${notaFinal.toFixed(2)}</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <table style="width: 50%; margin: 20px auto;">
-          <tr>
-            <td><strong>Puntaje máximo:</strong></td>
-            <td>20 puntos (100%)</td>
-          </tr>
-          <tr>
-            <td><strong>Puntaje mínimo de aprobación:</strong></td>
-            <td>16 puntos (80%)</td>
-          </tr>
-        </table>
-
-        <table style="width: 50%; margin: 20px auto;">
-          <tr>
-            <td><strong>Puntaje obtenido en números:</strong></td>
-            <td>${notaFinal.toFixed(2)}</td>
-          </tr>
-          <tr>
-            <td><strong>Puntaje obtenido en letras:</strong></td>
-            <td>${notaEnLetras}</td>
-          </tr>
-        </table>
-
-        <div class="firma">
-          <div class="firma-line"></div>
-          <strong>Firma</strong>
-          <br><br>
-          <strong>Docente Evaluador</strong>
-          <br>
-          ${evaluacion.evaluador.nombre + ' ' + evaluacion.evaluador.apellido || ''}
-        </div>
       </div>
-    </body>
-    </html>
-  `;
+    </div>
+
+    <table style="margin-top: 10px;">
+      <tr>
+        <td class="label">Estudiante:</td>
+        <td>${evaluacion.estudiante.nombre} ${evaluacion.estudiante.apellido}</td>
+      </tr>
+      <tr>
+        <td class="label">Tutor:</td>
+        <td>${evaluacion.estudiante.tutor || ''}</td>
+      </tr>
+      <tr>
+        <td class="label">Nombre del Miembro del Tribunal:</td>
+        <td>${evaluacion.evaluador.nombre + ' ' + evaluacion.evaluador.apellido || ''}</td>
+      </tr>
+      <tr>
+        <td class="label">Programa:</td>
+        <td>${evaluacion.estudiante.maestria || ''}</td>
+      </tr>
+      <tr>
+        <td class="label">Tema del Trabajo de Titulación:</td>
+        <td>${evaluacion.estudiante.tesis || ''}</td>
+      </tr>
+      <tr>
+        <td class="label">Fecha:</td>
+        <td>${new Date(evaluacion.fecha).toLocaleDateString()}</td>
+      </tr>
+    </table>
+
+    <table class="calificaciones">
+      <thead>
+        <tr>
+          <th>CRITERIOS</th>
+          <th>INDICADOR</th>
+          ${headerColsHTML}
+          <th>PUNTAJE</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${filasHTML}
+        <tr>
+          <td colspan="7" style="text-align: right; font-weight: bold;">TOTAL</td>
+          <td style="font-weight: bold;">${notaFinal.toFixed(2)}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table style="width: 60%; margin: 10px auto; page-break-before: always;">
+      <tr>
+        <td><strong>Puntaje máximo:</strong></td>
+        <td>20 puntos (100%)</td>
+      </tr>
+      <tr>
+        <td><strong>Puntaje mínimo de aprobación:</strong></td>
+        <td>16 puntos (80%)</td>
+      </tr>
+    </table>
+
+    <table style="width: 60%; margin: 10px auto;">
+      <tr>
+        <td><strong>Puntaje obtenido en números:</strong></td>
+        <td>${notaFinal.toFixed(2)}</td>
+      </tr>
+      <tr>
+        <td><strong>Puntaje obtenido en letras:</strong></td>
+        <td>${notaEnLetras}</td>
+      </tr>
+    </table>
+
+
+    <div class="firma">
+      <div class="firma-line"></div>
+      <strong>Firma</strong>
+      <br><br>
+      <strong>Docente Evaluador</strong>
+      <br>
+      ${evaluacion.evaluador.nombre + ' ' + evaluacion.evaluador.apellido || ''}
+    </div>
+  </div>
+</body>
+</html>
+`;
 };
+
 
 /**
  * Genera las filas HTML para cada criterio e indicador
@@ -307,8 +346,9 @@ const numerosALetras = (numero) => {
  * @returns {Promise<void>}
  */
 export const generarYCompartirPDF = async (evaluacion) => {
+  
   try {
-    const html = generarHTML(evaluacion);
+    const html = await generarHTML(evaluacion);
     
     if (!html) {
       throw new Error('No se pudo generar el HTML del reporte');
@@ -354,17 +394,34 @@ export const generarYCompartirPDF = async (evaluacion) => {
  */
 export const enviarCorreoConPDF = async (evaluacion, correoDestino) => {
   try {
-    const htmlContent = generarHTML(evaluacion);
+    const fs = require('fs');
+    const path = require('path');
+
+    function obtenerLogoBase64() {
+      try {
+        const logoPath = path.join(__dirname, '..', 'utilidades', 'Recurso 8.jpg');
+        const imgBuffer = fs.readFileSync(logoPath);
+        return `data:image/jpeg;base64,${imgBuffer.toString('base64')}`;
+      } catch (err) {
+        console.error('No se pudo leer el logo:', err);
+        return '';
+      }
+    }
+
+    const logoUri = await obtenerLogoUri();
+    
     
     if (!htmlContent) {
       throw new Error('No se pudo generar el HTML del reporte');
     }
     
     const asunto = `Evaluación - ${evaluacion.estudiante.nombre} ${evaluacion.estudiante.apellido}`;
-    const cuerpo = `Adjunto encontrará la evaluación de ${evaluacion.estudiante.nombre} ${evaluacion.estudiante.apellido}.
+    const cuerpo = `Señores,
+    Consejo de Posgrado
+    Facultad de Ingeniería y Ciencias Aplicadas  
 
-Fecha: ${new Date(evaluacion.fecha).toLocaleDateString()}
-Nota Final: ${evaluacion.notaFinal.toFixed(2)}`;
+    Se ha generado el archivo de calificación el dia ${new Date(evaluacion.fecha).toLocaleDateString()} a las ${new Date(evaluacion.fecha).toLocaleTimeString()}, del estudiante ${evaluacion.estudiante.nombre} ${evaluacion.estudiante.apellido}, evaluado por el Miembro del Tribunal ${evaluacion.evaluador.nombre} ${evaluacion.evaluador.apellido}.
+    Proceda a descargar e imprimir para la firma respectiva.`;
     
     const nombreArchivo = `Evaluacion_${evaluacion.estudiante.nombre}_${evaluacion.estudiante.apellido}.pdf`;
     

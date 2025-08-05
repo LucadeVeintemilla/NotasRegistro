@@ -59,7 +59,7 @@ const PantallaInicioAdmin = ({ navigation }) => {
 
         <View style={styles.cardSection}>
           <View style={styles.cardSection}>
-                    <Text style={styles.sectionTitle}>Gestión de Usuarios</Text>
+                    
                     
                     <TouchableOpacity
                       style={[styles.card, { backgroundColor: colores.primario }]}
@@ -68,45 +68,24 @@ const PantallaInicioAdmin = ({ navigation }) => {
                       <MaterialIcons name="person-add" size={28} color="#fff" />
                       <View style={styles.cardContent}>
                         <Text style={styles.cardTitle}>Registrar Usuario</Text>
-                        <Text style={styles.cardDescription}>Añadir nuevo usuario con rol Lector o Director</Text>
+                        <Text style={styles.cardDescription}>Administrar nuevo usuario</Text>
                       </View>
                     </TouchableOpacity>
                   </View>
-          <Text style={styles.sectionTitle}>Gestión de Usuarios</Text>
           <TouchableOpacity
             style={[styles.card, { backgroundColor: colores.primario }]}
             onPress={() => navigation.navigate('PantallaGestionUsuarios')}
           >
             <MaterialIcons name="supervisor-account" size={28} color="#fff" />
             <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>Usuarios</Text>
-              <Text style={styles.cardDescription}>Ver, editar o eliminar usuarios</Text>
+              <Text style={styles.cardTitle}>Gestión de Usuarios</Text>
+              <Text style={styles.cardDescription}>Ver o editar usuarios</Text>
             </View>
           </TouchableOpacity>
 
-          <Text style={styles.sectionTitle}>Gestión de Disertaciones</Text>
           
-          <TouchableOpacity
-            style={[styles.card, { backgroundColor: colores.primario }]}
-            onPress={() => navigation.navigate('CrearEstudiante')}
-          >
-            <MaterialIcons name="person-add" size={28} color="#fff" />
-            <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>Crear Estudiante</Text>
-              <Text style={styles.cardDescription}>Añadir nuevo estudiante para evaluación</Text>
-            </View>
-          </TouchableOpacity>
           
-          <TouchableOpacity
-            style={[styles.card, { backgroundColor: colores.secundario }]}
-            onPress={() => navigation.navigate('ProgramarEvaluacion')}
-          >
-            <MaterialIcons name="schedule" size={28} color="#fff" />
-            <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>Programar Disertación</Text>
-              <Text style={styles.cardDescription}>Definir rango horario para disertaciones</Text>
-            </View>
-          </TouchableOpacity>
+          
         </View>
 
         <View style={styles.cardSection}>

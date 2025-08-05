@@ -26,7 +26,7 @@ const PantallaInicioLector = ({ navigation, route }) => {
       const pendientes = response.data.data.filter(evaluacion => {
         const inicio = new Date(evaluacion.horarioInicio);
         const fin = new Date(evaluacion.horarioFin);
-        return evaluacion.estado === 'pendiente' && now >= inicio && now <= fin;
+        return evaluacion.estado === 'pendiente' && now <= fin;
       });
       
       setEvaluacionesPendientes(pendientes);
@@ -152,7 +152,7 @@ const PantallaInicioLector = ({ navigation, route }) => {
         <View style={styles.evaluacionFooter}>
           <Text style={styles.evaluacionInfo}>
             <MaterialIcons name="event" size={14} color={colores.texto} /> {' '}
-            {new Date(item.horarioInicio).toLocaleTimeString()} - {new Date(item.horarioFin).toLocaleTimeString()}
+            {new Date(item.horarioInicio).toLocaleDateString()} {new Date(item.horarioInicio).toLocaleTimeString()} - {new Date(item.horarioFin).toLocaleTimeString()}
           </Text>
         </View>
       </TouchableOpacity>

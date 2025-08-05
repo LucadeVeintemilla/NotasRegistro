@@ -26,19 +26,29 @@ const PantallaAyuda = ({ navigation }) => {
         <View style={styles.seccion}>
           <Text style={styles.tituloSeccion}>Sobre la Aplicación</Text>
           <Text style={styles.parrafo}>
-            Registro de Notas es una aplicación diseñada para facilitar la disertación 
-            de estudiantes durante la presentación de sus proyectos o tesis.
+          Sobre DisertaAppCP
+ que permite la calificación automática de la Disertación Oral de los estudiantes de los programas de maestría, por parte del tribunal.
+
           </Text>
         </View>
 
         <View style={styles.seccion}>
-          <Text style={styles.tituloSeccion}>Roles de Usuario</Text>
+          <Text style={styles.tituloSeccion}>Instrucciones</Text>
           
-          <Text style={styles.subtituloSeccion}>Administrador</Text>
           <Text style={styles.parrafo}>
-            • Puede crear estudiantes{'\n'}
-            • Puede programar disertaciones con rangos horarios{'\n'}
-            • No puede calificar ni buscar disertaciones
+            La disertación oral se realizará ante el Tribunal Lector-Evaluador, con una duración de 60  minutos 
+            en total, distribuida de la siguiente manera:{'\n'}
+            {'\n'}
+            • Presentación por parte del estudiante: 30 minutos{'\n'}
+            • Ronda de preguntas por part del Tribunal Lector-Evaluador: 15 minutos.
+            Se recuerda que las preguntas deben ser formuladas de acuerdo con el tema del trbajo de titulación y de la disertación.{'\n'}
+            • Deliberación y registro de las calificaciones por parte del Tribunal Lector-Evaluador: 15 minutos{'\n'}
+            {'\n'}
+            Si la disertación oral se Aprueba, se procede a la investidura y a la toma del juramento.{'\n'}
+            {'\n'}
+            Si la diseración oral No se Aprueba, el estudiante podrá presentarse nuevamente 
+            en el término de treinta (30) días, cumpliendo con lo establecido en el Instructivo 
+            de Titulación para los Programas con Trayectoria Profesional.{'\n'}
           </Text>
           
           <Text style={styles.subtituloSeccion}>Lector</Text>

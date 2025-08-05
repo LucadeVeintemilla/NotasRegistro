@@ -1,7 +1,8 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, AppState, StyleSheet, View } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, AppState, StyleSheet, View, Alert, BackHandler } from 'react-native';
+import { logout } from '../servicios/auth/authService';
 
 import CrearEstudiante from '../pantallas/CrearEstudiante';
 import PantallaAsignarHorario from '../pantallas/PantallaAsignarHorario';
@@ -38,6 +39,7 @@ const AuthStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="PantallaLogin" component={PantallaLogin} />
     <Stack.Screen name="PantallaRegistro" component={PantallaRegistro} />
+    <Stack.Screen name="CambiarContrasena" component={CambiarContrasena} />
   </Stack.Navigator>
 );
 
@@ -104,6 +106,9 @@ const NavegacionPrincipal = () => {
   const [usuarioAutenticado, setUsuarioAutenticado] = useState(false);
   const [rol, setRol] = useState(null);
   const [tokenValido, setTokenValido] = useState(false);
+  const tiempoInactividad = useRef(null);
+  const tiempoInactividadRef = useRef(null);
+  const SEGUNDOS_INACTIVIDAD = 15 * 60; // 15 minutos en segundos
   
   const actualizarAutenticacion = useCallback(async () => {
     setCargandoAutenticacion(true);
@@ -151,19 +156,91 @@ const NavegacionPrincipal = () => {
     }
   }, []);
 
+  // Función para reiniciar el temporizador de inactividad
+  const reiniciarTemporizador = useCallback(() => {
+    if (tiempoInactividadRef.current) {
+      clearTimeout(tiempoInactividadRef.current);
+    }
+    
+    tiempoInactividadRef.current = setTimeout(async () => {
+      // Mostrar alerta antes de cerrar sesión
+      Alert.alert(
+        'Sesión inactiva',
+        'Su sesión ha expirado por inactividad. Será redirigido a la pantalla de inicio de sesión.',
+        [
+          {
+            text: 'Aceptar',
+            onPress: async () => {
+              await logout();
+              setUsuarioAutenticado(false);
+              setRol(null);
+              setTokenValido(false);
+            },
+          },
+        ],
+        { cancelable: false }
+      );
+    }, SEGUNDOS_INACTIVIDAD * 1000);
+  }, []);
+
+  // Efecto para manejar la inactividad
+  useEffect(() => {
+    if (!usuarioAutenticado) return;
+    
+    // Configurar el temporizador inicial
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    
+    // Iniciar el temporizador
+    reiniciarTemporizador();
+    
+    // Limpiar al desmontar
+    return () => {
+      if (tiempoInactividadRef.current) {
+        clearTimeout(tiempoInactividadRef.current);
+      }
+      subscription.remove();
+    };
+  }, [usuarioAutenticado, reiniciarTemporizador]);
+  
+  // Manejar cambios en el estado de la aplicación
+  const handleAppStateChange = (nextAppState) => {
+    if (nextAppState === 'active') {
+      // Reiniciar el temporizador cuando la app vuelve a primer plano
+      reiniciarTemporizador();
+    } else if (nextAppState === 'background' || nextAppState === 'inactive') {
+      // Limpiar el temporizador cuando la app va a segundo plano
+      if (tiempoInactividadRef.current) {
+        clearTimeout(tiempoInactividadRef.current);
+      }
+    }
+  };
+
+  // Efecto para verificar autenticación y manejar cambios en el estado de la app
   useEffect(() => {
     checkAuth();
     
     const subscription = AppState.addEventListener('change', (nextAppState) => {
       if (nextAppState === 'active') {
         checkAuth();
+        // Reiniciar el temporizador cuando la app vuelve a estar activa
+        if (usuarioAutenticado) {
+          reiniciarTemporizador();
+        }
+      } else if (nextAppState === 'background') {
+        // Limpiar el temporizador cuando la app va a segundo plano
+        if (tiempoInactividadRef.current) {
+          clearTimeout(tiempoInactividadRef.current);
+        }
       }
     });
     
     return () => {
       subscription.remove();
+      if (tiempoInactividadRef.current) {
+        clearTimeout(tiempoInactividadRef.current);
+      }
     };
-  }, [checkAuth]);
+  }, [checkAuth, usuarioAutenticado, reiniciarTemporizador]);
 
   if (cargandoAutenticacion) {
     return (

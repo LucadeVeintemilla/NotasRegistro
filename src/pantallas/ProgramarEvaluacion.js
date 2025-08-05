@@ -131,6 +131,13 @@ const ProgramarEvaluacion = ({ route, navigation }) => {
       return Alert.alert('Error', 'Todos los campos son obligatorios');
     }
 
+    // Validación de intervalo mínimo de 24 horas desde ahora
+    const ahora = new Date();
+    const minimoInicio = new Date(ahora.getTime() + 24 * 60 * 60 * 1000);
+    if (formData.horarioInicio < minimoInicio) {
+      return Alert.alert('Error', 'La disertación debe programarse al menos 24 horas después de la fecha y hora actuales.');
+    }
+
     if (formData.horarioInicio >= formData.horarioFin) {
       return Alert.alert('Error', 'La hora de fin debe ser posterior a la hora de inicio');
     }

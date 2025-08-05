@@ -89,8 +89,10 @@ const PantallaGestionUsuarios = ({ navigation }) => {
       // Mostrar mensajes de error más amigables
       if (err.message.includes('shorter than the minimum allowed length')) {
         Alert.alert('Error', 'La contraseña debe tener al menos 6 caracteres');
+      } else if (err.message.includes('Ya existe un usuario')) {
+        Alert.alert('Error', 'Ya existe un usuario con ese correo');
       } else if (err.message.includes('correo') || err.message.includes('correo electrónico')) {
-        Alert.alert('Error', 'Por favor ingrese un correo electrónico válido');
+        Alert.alert('Error', err.message);
       } else {
         Alert.alert('Error', err.message || 'No se pudo actualizar');
       }
