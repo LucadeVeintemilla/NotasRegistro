@@ -131,7 +131,6 @@ const ProgramarEvaluacion = ({ route, navigation }) => {
       return Alert.alert('Error', 'Todos los campos son obligatorios');
     }
 
-    // Validación de intervalo mínimo de 24 horas desde ahora
     const ahora = new Date();
     const minimoInicio = new Date(ahora.getTime() + 24 * 60 * 60 * 1000);
     if (formData.horarioInicio < minimoInicio) {

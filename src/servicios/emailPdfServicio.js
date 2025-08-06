@@ -1,13 +1,10 @@
-import * as FileSystem from 'expo-file-system';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { Asset } from 'expo-asset';
+import * as FileSystem from 'expo-file-system';
 
-async function obtenerLogoUri() {
-  const asset = Asset.fromModule(require('../utilidades/Recurso 8.png'));
-  await asset.downloadAsync();          
-  return asset.localUri || asset.uri;   
-}
+
+
 import { Linking } from 'react-native';
 import { getApiUrl } from '../config/api';
 import { obtenerRubricaPorTipo } from '../basedatos/rubricas';
@@ -20,7 +17,6 @@ const API_URL = 'http://192.168.100.35:3000/api/email';
  * @returns {string} Contenido HTML para el PDF
  */
 export const generarHTML = async (evaluacion) => {
-  const logoUri = await obtenerLogoUri();
 
   if (!evaluacion || !evaluacion.resultados || !evaluacion.estudiante) {
     console.error('Datos de evaluación incompletos');
@@ -34,6 +30,11 @@ export const generarHTML = async (evaluacion) => {
 
   // Encabezados dinámicos según el tipo de rúbrica (antigua o actual)
   const tipoDisertacion = evaluacion.estudiante?.tipo || 'actual';
+  
+  const configuracionPuntajes = tipoDisertacion === 'actual' 
+    ? { maximo: 20, minimoAprobacion: 16 } 
+    : { maximo: 10, minimoAprobacion: 7 };
+
   const rubrica = obtenerRubricaPorTipo(tipoDisertacion);
   const columnas = rubrica[0]?.indicadores[0]?.opciones.map(o => o.label.toUpperCase()) || [];
   const headerColsHTML = columnas.map(c => `<th>${c}</th>`).join('');
@@ -183,11 +184,11 @@ export const generarHTML = async (evaluacion) => {
     <table style="width: 60%; margin: 10px auto; page-break-before: always;">
       <tr>
         <td><strong>Puntaje máximo:</strong></td>
-        <td>20 puntos (100%)</td>
+        <td>${configuracionPuntajes.maximo} puntos (100%)</td>
       </tr>
       <tr>
         <td><strong>Puntaje mínimo de aprobación:</strong></td>
-        <td>16 puntos (80%)</td>
+        <td>${configuracionPuntajes.minimoAprobacion} puntos (${Math.round((configuracionPuntajes.minimoAprobacion / configuracionPuntajes.maximo) * 100)}%)</td>
       </tr>
     </table>
 
@@ -394,26 +395,13 @@ export const generarYCompartirPDF = async (evaluacion) => {
  */
 export const enviarCorreoConPDF = async (evaluacion, correoDestino) => {
   try {
-    const fs = require('fs');
-    const path = require('path');
+   
 
-    function obtenerLogoBase64() {
-      try {
-        const logoPath = path.join(__dirname, '..', 'utilidades', 'Recurso 8.jpg');
-        const imgBuffer = fs.readFileSync(logoPath);
-        return `data:image/jpeg;base64,${imgBuffer.toString('base64')}`;
-      } catch (err) {
-        console.error('No se pudo leer el logo:', err);
-        return '';
-      }
-    }
+   
 
-    const logoUri = await obtenerLogoUri();
     
-    
-    if (!htmlContent) {
-      throw new Error('No se pudo generar el HTML del reporte');
-    }
+    const htmlContent = await generarHTML(evaluacion);
+
     
     const asunto = `Evaluación - ${evaluacion.estudiante.nombre} ${evaluacion.estudiante.apellido}`;
     const cuerpo = `Señores,

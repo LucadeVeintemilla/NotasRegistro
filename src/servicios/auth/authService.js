@@ -116,7 +116,6 @@ export const actualizarUsuario = async (id, datos) => {
     const response = await axios.put(getApiUrl(`${AUTH_BASE_PATH}/usuarios/${id}`), datos);
     return response.data;
   } catch (error) {
-    // Propagar mensajes específicos del backend (por ejemplo, correo duplicado)
     if (error.response && error.response.data) {
       const msg = error.response.data.message || error.response.data.error || 'Error en el servidor';
       throw new Error(msg);
