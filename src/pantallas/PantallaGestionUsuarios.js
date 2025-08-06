@@ -22,11 +22,11 @@ const PantallaGestionUsuarios = ({ navigation }) => {
   const [cargando, setCargando] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [usuarioEdit, setUsuarioEdit] = useState(null);
-  const [formData, setFormData] = useState({ 
-    nombre: '', 
-    apellido: '', 
-    correo: '', 
-    telefono: '', 
+  const [formData, setFormData] = useState({
+    nombre: '',
+    apellido: '',
+    correo: '',
+    telefono: '',
     tipo: 'lector',
     contraseña: ''
   });
@@ -62,12 +62,7 @@ const PantallaGestionUsuarios = ({ navigation }) => {
 
   const handleGuardar = async () => {
     try {
-      // Validar formato de correo
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (formData.correo && !emailRegex.test(formData.correo)) {
-        Alert.alert('Error', 'Por favor ingrese un correo electrónico válido');
-        return;
-      }
+
 
       // Validar longitud de contraseña si se proporciona
       if (formData.contraseña && formData.contraseña.length < 6) {
@@ -80,7 +75,7 @@ const PantallaGestionUsuarios = ({ navigation }) => {
       if (!datosActualizacion.contraseña) {
         delete datosActualizacion.contraseña;
       }
-      
+
       await actualizarUsuario(usuarioEdit.id || usuarioEdit._id, datosActualizacion);
       Alert.alert('Éxito', 'Usuario actualizado');
       setModalVisible(false);
@@ -90,7 +85,7 @@ const PantallaGestionUsuarios = ({ navigation }) => {
       if (err.message.includes('shorter than the minimum allowed length')) {
         Alert.alert('Error', 'La contraseña debe tener al menos 6 caracteres');
       } else if (err.message.includes('Ya existe un usuario')) {
-        Alert.alert('Error', 'Ya existe un usuario con ese correo');
+        Alert.alert('Error', 'Ya existe un usuario con ese nombre');
       } else if (err.message.includes('correo') || err.message.includes('correo electrónico')) {
         Alert.alert('Error', err.message);
       } else {
@@ -126,7 +121,7 @@ const PantallaGestionUsuarios = ({ navigation }) => {
         <TouchableOpacity onPress={() => abrirModalEdicion(item)} style={styles.actionButton}>
           <MaterialIcons name="edit" size={24} color="#fff" />
         </TouchableOpacity>
-        
+
       </View>
     </View>
   );
@@ -162,24 +157,34 @@ const PantallaGestionUsuarios = ({ navigation }) => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>Editar Usuario</Text>
-            {['nombre','apellido','correo','telefono','contraseña'].map((campo)=>(
+            {['nombre', 'apellido', 'correo', 'telefono', 'contraseña'].map((campo) => (
               <View key={campo} style={styles.inputRow}>
-                <Text style={styles.label}>{campo.charAt(0).toUpperCase()+campo.slice(1)}</Text>
+                <Text style={styles.label}>
+                  {campo === 'correo'
+                    ? 'Usuario'
+                    : campo.charAt(0).toUpperCase() + campo.slice(1)}
+                </Text>
                 <TextInput
-                  style={[styles.input,{flex:1}]}
+                  style={[styles.input, { flex: 1 }]}
                   value={formData[campo]}
-                  onChangeText={(v)=>setFormData({...formData,[campo]:v})}
+                  onChangeText={(v) => setFormData({ ...formData, [campo]: v })}
                   secureTextEntry={campo === 'contraseña'}
-                  placeholder={campo === 'contraseña' ? 'Dejar en blanco para no cambiar' : ''}
+                  placeholder={
+                    campo === 'contraseña'
+                      ? 'Dejar en blanco para no cambiar'
+                      : campo === 'correo'
+                        ? 'Usuario'
+                        : ''
+                  }
                 />
               </View>
             ))}
-            <View style={styles.inputRow}>
+            < View style={styles.inputRow}>
               <Text style={styles.label}>Tipo</Text>
               <Picker
                 selectedValue={formData.tipo}
-                style={{flex:1}}
-                onValueChange={(itemValue)=>setFormData({...formData,tipo:itemValue})}
+                style={{ flex: 1 }}
+                onValueChange={(itemValue) => setFormData({ ...formData, tipo: itemValue })}
               >
                 <Picker.Item label="Lector" value="lector" />
                 <Picker.Item label="Secretario" value="secretario" />
@@ -187,11 +192,11 @@ const PantallaGestionUsuarios = ({ navigation }) => {
                 <Picker.Item label="Director" value="director" />
               </Picker>
             </View>
-            <View style={{ flexDirection:'row',justifyContent:'space-between',marginTop:10 }}>
-              <TouchableOpacity style={[styles.btn,{backgroundColor:colores.primario}]} onPress={handleGuardar}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 10 }}>
+              <TouchableOpacity style={[styles.btn, { backgroundColor: colores.primario }]} onPress={handleGuardar}>
                 <Text style={styles.btnText}>Guardar</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.btn,{backgroundColor:colores.deficiente}]} onPress={()=>setModalVisible(false)}>
+              <TouchableOpacity style={[styles.btn, { backgroundColor: colores.deficiente }]} onPress={() => setModalVisible(false)}>
                 <Text style={styles.btnText}>Cancelar</Text>
               </TouchableOpacity>
             </View>
@@ -203,24 +208,24 @@ const PantallaGestionUsuarios = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container:{ flex:1, backgroundColor:'#f5f5f5' },
-  header:{ backgroundColor:colores.primario, padding:15, paddingTop:Platform.OS==='android'?StatusBar.currentHeight+10:45, flexDirection:'row', alignItems:'center'},
-  backButton:{ flexDirection:'row', alignItems:'center'},
-  backText:{ color:'#fff', marginLeft:4 },
-  headerTitle:{ color:'#fff', fontSize:18, fontWeight:'bold', marginLeft:16 },
-  itemContainer:{ flexDirection:'row', justifyContent:'space-between', backgroundColor:'#fff', padding:12, marginBottom:10, borderRadius:6, elevation:2 },
-  nombre:{ fontSize:16, fontWeight:'bold' },
-  detalle:{ fontSize:12, color:'#555' },
-  itemActions:{ flexDirection:'row', alignItems:'center' },
-  actionButton:{ backgroundColor:colores.secundario, padding:6, borderRadius:4, marginLeft:8 },
-  modalOverlay:{ flex:1, backgroundColor:'rgba(0,0,0,0.5)', justifyContent:'center', alignItems:'center' },
-  modalContainer:{ backgroundColor:'#fff', width:'85%', padding:16, borderRadius:8 },
-  modalTitle:{ fontSize:16, fontWeight:'bold', marginBottom:10 },
-  input:{ borderWidth:1, borderColor:'#ccc', borderRadius:4, padding:8, marginBottom:8 },
-  btn:{ flex:1, padding:10, borderRadius:4, alignItems:'center', marginHorizontal:4 },
-  btnText:{ color:'#fff', fontWeight:'bold' },
-  inputRow:{ flexDirection:'row', alignItems:'center', marginBottom:8 },
-  label:{ width:90 }
+  container: { flex: 1, backgroundColor: '#f5f5f5' },
+  header: { backgroundColor: colores.primario, padding: 15, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight + 10 : 45, flexDirection: 'row', alignItems: 'center' },
+  backButton: { flexDirection: 'row', alignItems: 'center' },
+  backText: { color: '#fff', marginLeft: 4 },
+  headerTitle: { color: '#fff', fontSize: 18, fontWeight: 'bold', marginLeft: 16 },
+  itemContainer: { flexDirection: 'row', justifyContent: 'space-between', backgroundColor: '#fff', padding: 12, marginBottom: 10, borderRadius: 6, elevation: 2 },
+  nombre: { fontSize: 16, fontWeight: 'bold' },
+  detalle: { fontSize: 12, color: '#555' },
+  itemActions: { flexDirection: 'row', alignItems: 'center' },
+  actionButton: { backgroundColor: colores.secundario, padding: 6, borderRadius: 4, marginLeft: 8 },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
+  modalContainer: { backgroundColor: '#fff', width: '85%', padding: 16, borderRadius: 8 },
+  modalTitle: { fontSize: 16, fontWeight: 'bold', marginBottom: 10 },
+  input: { borderWidth: 1, borderColor: '#ccc', borderRadius: 4, padding: 8, marginBottom: 8 },
+  btn: { flex: 1, padding: 10, borderRadius: 4, alignItems: 'center', marginHorizontal: 4 },
+  btnText: { color: '#fff', fontWeight: 'bold' },
+  inputRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
+  label: { width: 90 }
 });
 
 export default PantallaGestionUsuarios;

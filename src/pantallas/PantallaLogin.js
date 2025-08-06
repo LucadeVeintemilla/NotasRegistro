@@ -71,10 +71,10 @@ const PantallaLogin = ({ navigation }) => {
         <Text style={styles.formTitulo}>Iniciar Sesión</Text>
         
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Correo Electrónico</Text>
+          <Text style={styles.label}>Usuario</Text>
           <TextInput
             style={styles.input}
-            placeholder="Ingrese su correo"
+            placeholder="Ingrese su usuario"
             keyboardType="email-address"
             autoCapitalize="none"
             value={correo}

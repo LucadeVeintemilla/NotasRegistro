@@ -38,10 +38,7 @@ const PantallaRegistro = ({ navigation }) => {
       return Alert.alert('Error', 'La contraseña debe tener al menos 6 caracteres');
     }
 
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.correo)) {
-      return Alert.alert('Error', 'El formato del correo electrónico no es válido');
-    }
+     
 
     try {
       setCargando(true);
@@ -118,10 +115,10 @@ const PantallaRegistro = ({ navigation }) => {
         </View>
         
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Correo Electrónico</Text>
+          <Text style={styles.label}>Usuario</Text>
           <TextInput
             style={styles.input}
-            placeholder="Ingrese su correo"
+            placeholder="Ingrese su usuario"
             keyboardType="email-address"
             autoCapitalize="none"
             value={formData.correo}
