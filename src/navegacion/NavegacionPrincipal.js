@@ -1,7 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, AppState, StyleSheet, View, Alert, BackHandler } from 'react-native';
+import { ActivityIndicator, AppState, StyleSheet, View, Alert, BackHandler, TouchableWithoutFeedback } from 'react-native';
 import { logout } from '../servicios/auth/authService';
 
 import CrearEstudiante from '../pantallas/CrearEstudiante';
@@ -258,21 +258,30 @@ const NavegacionPrincipal = () => {
   };
 
   return (
-    <AuthContext.Provider value={authContextValue}>
-      <NavigationContainer>
-        {!usuarioAutenticado ? (
-          <AuthStack />
-        ) : (
-          <>
-            {rol === 'administrador' && <AdminStack />}
-            {rol === 'lector' && <LectorStack />}
-            {rol === 'director' && <DirectorStack />}
-            {rol === 'tecnico' && <TecnicoStack />}
-            {rol === 'secretario' && <SecretarioStack />}
-          </>
-        )}
-      </NavigationContainer>
-    </AuthContext.Provider>
+    <TouchableWithoutFeedback
+      onPressIn={reiniciarTemporizador}
+      accessible={false}
+    >
+      <View style={{ flex: 1 }}>
+        <AuthContext.Provider value={authContextValue}>
+          <NavigationContainer
+            onStateChange={reiniciarTemporizador}
+          >
+            {!usuarioAutenticado ? (
+              <AuthStack />
+            ) : (
+              <>
+                {rol === 'administrador' && <AdminStack />}
+                {rol === 'lector' && <LectorStack />}
+                {rol === 'director' && <DirectorStack />}
+                {rol === 'tecnico' && <TecnicoStack />}
+                {rol === 'secretario' && <SecretarioStack />}
+              </>
+            )}
+          </NavigationContainer>
+        </AuthContext.Provider>
+      </View>
+    </TouchableWithoutFeedback>
   );
 };
 

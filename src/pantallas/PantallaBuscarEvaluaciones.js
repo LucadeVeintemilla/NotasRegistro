@@ -33,19 +33,67 @@ const PantallaBuscarEvaluaciones = ({ navigation, route }) => {
         throw new Error('No se pudo obtener información del usuario');
       }
       
-      const response = await axios.get(getApiUrl('/api/evaluaciones'));
-      
-      let evaluacionesPermitidas = response.data.data;
-      
-      if (userData.tipo === 'lector') {
+      let evaluacionesPermitidas = [];
+
+      if (!modoCalificacion) {
+        if (userData.tipo === 'director') {
+          const respDirector = await axios.get(getApiUrl('/api/evaluaciones/todas'));
+          evaluacionesPermitidas = Array.isArray(respDirector.data?.data) ? respDirector.data.data : [];
+          console.log('[BuscarEvaluaciones] director - endpoint /todas total:', evaluacionesPermitidas.length);
+        } else {
+          const resp = await axios.get(getApiUrl('/api/evaluaciones'));
+          evaluacionesPermitidas = Array.isArray(resp.data?.data) ? resp.data.data : [];
+          console.log('[BuscarEvaluaciones] mis evaluaciones (no director) total:', evaluacionesPermitidas.length);
+        }
+      } else {
+        
+        let page = 1;
+        const limit = 100;
+        let allData = [];
+        while (true) {
+          const resp = await axios.get(getApiUrl('/api/evaluaciones'), { params: { limit, page } });
+          const batch = Array.isArray(resp.data?.data) ? resp.data.data : [];
+          console.log(`[BuscarEvaluaciones] página ${page}, recibidos:`, batch.length);
+          allData = allData.concat(batch);
+          if (!batch.length || batch.length < limit) break;
+          page += 1;
+          if (page > 100) break;
+        }
+        evaluacionesPermitidas = allData;
+        console.log('[BuscarEvaluaciones] total API acumulado:', allData.length, {
+          modoCalificacion: !!modoCalificacion,
+          userTipo: userData?.tipo,
+          userId: userData?.id,
+        });
+      }
+
+      console.log('[BuscarEvaluaciones] total API:', evaluacionesPermitidas.length, {
+        modoCalificacion: !!modoCalificacion,
+        userTipo: userData?.tipo,
+        userId: userData?.id,
+      });
+
+     
+      if (userData.tipo === 'lector' && modoCalificacion) {
         evaluacionesPermitidas = evaluacionesPermitidas.filter(
-          evaluacion => 
+          (evaluacion) =>
             (evaluacion.evaluador && evaluacion.evaluador._id === userData.id) ||
             evaluacion.createdBy === userData.id
         );
+        console.log('[BuscarEvaluaciones] tras filtro lector asignadas:', evaluacionesPermitidas.length);
       }
-      
-      
+
+      if (modoCalificacion) {
+        const ahora = new Date();
+        evaluacionesPermitidas = evaluacionesPermitidas.filter((evaluacion) => {
+          const inicio = new Date(evaluacion.horarioInicio);
+          const fin = new Date(evaluacion.horarioFin);
+          return evaluacion.estado === 'pendiente' && ahora <= fin && ahora >= inicio;
+        });
+        console.log('[BuscarEvaluaciones] tras filtro modoCalificacion (pendiente y ventana):', evaluacionesPermitidas.length);
+      }
+
+      console.log('[BuscarEvaluaciones] final a mostrar (sin textoBusqueda):', evaluacionesPermitidas.length);
       setEvaluaciones(evaluacionesPermitidas);
       setEvaluacionesFiltradas(evaluacionesPermitidas);
     } catch (error) {
@@ -69,6 +117,7 @@ const PantallaBuscarEvaluaciones = ({ navigation, route }) => {
     
     if (!texto.trim()) {
       setEvaluacionesFiltradas(evaluaciones);
+      console.log('[BuscarEvaluaciones] filtro vacío, mostrando todas:', evaluaciones.length);
       return;
     }
     
@@ -78,7 +127,7 @@ const PantallaBuscarEvaluaciones = ({ navigation, route }) => {
       evaluacion.estudiante?.nombre?.toLowerCase().includes(textoLower) || 
       evaluacion.estudiante?.apellido?.toLowerCase().includes(textoLower)
     );
-    
+    console.log('[BuscarEvaluaciones] filtrar texto:', texto, 'base:', evaluaciones.length, 'resultado:', filtradas.length);
     setEvaluacionesFiltradas(filtradas);  };
   const renderItem = ({ item }) => {
     const fecha = new Date(item.fecha).toLocaleDateString();
@@ -152,13 +201,18 @@ const PantallaBuscarEvaluaciones = ({ navigation, route }) => {
     <View style={styles.contenedorVacio}>
       <Feather name="search" size={64} color={colores.texto + '80'} />
       <Text style={styles.textoVacio}>
-        {textoBusqueda ? 'No se encontraron resultados' : 'No hay evaluaciones asignadas'}
+        {textoBusqueda
+          ? 'No se encontraron resultados'
+          : modoCalificacion
+            ? 'No hay evaluaciones disponibles para calificar'
+            : 'No hay evaluaciones registradas'}
       </Text>
       <Text style={styles.subtextoVacio}>
-        {textoBusqueda 
+        {textoBusqueda
           ? 'Intenta con otros términos de búsqueda'
-          : 'Las evaluaciones que te sean asignadas aparecerán aquí'
-        }
+          : modoCalificacion
+            ? 'Verifique el horario y que existan evaluaciones pendientes'
+            : 'Cuando existan evaluaciones aparecerán en esta lista'}
       </Text>
     </View>
   );
